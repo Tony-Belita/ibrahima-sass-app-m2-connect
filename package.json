@@ -7,8 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate": "npx drizzle-kit generate -- dotenv_config_path='.env.local'",
-    "db-create": "npx drizzle-kit push -- dotenv_config_path='.env.local'"
+    "migrate": "dotenv -e .env.local -- npx drizzle-kit generate",
+    "db-create": "dotenv -e .env.local -- npx drizzle-kit push",
+    "db-studio": "dotenv -e .env.local -- npx drizzle-kit studio"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.30.0",
@@ -17,6 +18,8 @@
     "@tailwindcss/cli": "^4.1.11",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^17.2.1",
+    "drizzle-orm": "^0.36.4",
     "lucide-react": "^0.539.0",
     "motion": "^12.23.12",
     "next": "15.4.6",
@@ -31,6 +34,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.21",
+    "dotenv-cli": "^7.4.2",
+    "drizzle-kit": "^0.31.4",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
     "postcss": "^8.5.6",
