@@ -1,9 +1,28 @@
 import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
+import { tableFactures, tableClients, tableInfosBancaires } from './schema';
 
 // Vérification de la présence de l'URL de la base de données Neon
 if (!process.env.NEON_DATABASE_URL) {
   throw new Error('NEON_DATABASE_URL doit être une chaîne de connexion Postgres Neon valide');
 }
+
+/**
+ * Instance de connexion SQL réutilisable pour les requêtes
+ * Utilise la variable d'environnement NEON_DATABASE_URL
+ */
+export const sql = neon(process.env.NEON_DATABASE_URL!);
+
+/**
+ * Instance Drizzle ORM pour les opérations de base de données
+ */
+export const db = drizzle(sql, {
+  schema: {
+    tableFactures,
+    tableClients,
+    tableInfosBancaires,
+  },
+});
 
 /**
  * Fonction pour obtenir la version de la base de données PostgreSQL
@@ -12,9 +31,6 @@ if (!process.env.NEON_DATABASE_URL) {
  */
 export const obtenirVersionBD = async (): Promise<{ version: string }> => {
   try {
-    // Création de la connexion SQL avec Neon
-    const sql = neon(process.env.NEON_DATABASE_URL!);
-    
     // Exécution de la requête pour obtenir la version
     const reponse = await sql`SELECT version()`;
     
@@ -26,12 +42,6 @@ export const obtenirVersionBD = async (): Promise<{ version: string }> => {
     throw new Error('Impossible de se connecter à la base de données Neon');
   }
 };
-
-/**
- * Instance de connexion SQL réutilisable pour les requêtes
- * Utilise la variable d'environnement NEON_DATABASE_URL
- */
-export const sql = neon(process.env.NEON_DATABASE_URL!);
 
 /**
  * Fonction utilitaire pour tester la connexion à la base de données
@@ -54,6 +64,7 @@ export const testerConnexionBD = async (): Promise<boolean> => {
  */
 export default {
   sql,
+  db,
   obtenirVersionBD,
   testerConnexionBD,
 };
