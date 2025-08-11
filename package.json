@@ -9,11 +9,13 @@
     "lint": "next lint",
     "migrate": "dotenv -e .env.local -- npx drizzle-kit generate",
     "db-create": "dotenv -e .env.local -- npx drizzle-kit push",
-    "db-studio": "dotenv -e .env.local -- npx drizzle-kit studio"
+    "db-studio": "dotenv -e .env.local -- npx drizzle-kit studio",
+    "email": "email dev --dir src/app/emails"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.30.0",
     "@neondatabase/serverless": "^1.0.1",
+    "@react-email/components": "0.5.0",
     "@tabler/icons-react": "^3.34.1",
     "@tailwindcss/cli": "^4.1.11",
     "class-variance-authority": "^0.7.1",
@@ -25,6 +27,7 @@
     "next": "15.4.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-email": "4.2.8",
     "react-to-print": "^3.1.1",
     "resend": "^6.0.1",
     "tailwind-merge": "^3.3.1"
