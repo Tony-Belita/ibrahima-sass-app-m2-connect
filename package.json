@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate": "npx drizzle-kit generate -- dotenv_config_path='.env.local'",
+    "db-create": "npx drizzle-kit push -- dotenv_config_path='.env.local'"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.30.0",
