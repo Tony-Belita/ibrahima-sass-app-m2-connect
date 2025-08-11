@@ -1,6 +1,6 @@
 import {  text, serial, pgTable, timestamp, numeric } from "drizzle-orm/pg-core";
 
-//👇🏻 Table des factures avec ses types de colonnes
+// Table des factures avec ses types de colonnes
 export const tableFactures = pgTable("factures", {
     id: serial("id").primaryKey().notNull(),
     id_proprietaire: text("id_proprietaire").notNull(),
@@ -11,7 +11,7 @@ export const tableFactures = pgTable("factures", {
     montant_total: numeric("montant_total").notNull(),
 });
 
-//👇🏻 Table des clients avec ses types de colonnes
+// Table des clients avec ses types de colonnes
 export const tableClients = pgTable("clients", {
     id: serial("id").primaryKey().notNull(),
     cree_le: timestamp("cree_le").defaultNow(),
@@ -21,7 +21,7 @@ export const tableClients = pgTable("clients", {
     adresse: text("adresse").notNull(),
 })
 
-//👇🏻 Table des informations bancaires avec ses types de colonnes
+// Table des informations bancaires avec ses types de colonnes
 export const tableInfosBancaires = pgTable("infos_bancaires", {
     id: serial("id").primaryKey().notNull(),
     id_proprietaire: text("id_proprietaire").notNull().unique(),
