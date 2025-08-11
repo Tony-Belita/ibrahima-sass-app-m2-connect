@@ -128,8 +128,8 @@ export default function PageFacture() {
         
         console.log("📄 Réponse API facture:", donneesFacture);
         
-        if (donneesFacture.facture && donneesFacture.facture.length > 0) {
-          const factureData = donneesFacture.facture[0];
+        if (donneesFacture.facture) {
+          const factureData = donneesFacture.facture; // C'est un objet, pas un tableau
           console.log("✅ Données facture:", factureData);
           setFacture(factureData);
           
@@ -145,12 +145,12 @@ export default function PageFacture() {
           console.log("🏦 Réponse API infos bancaires:", donneesInfoBancaire);
           setInfoBancaire(donneesInfoBancaire.infosBancaires);
         } else {
-          console.error("❌ Aucune facture trouvée pour l'ID:", id);
+          console.error(" Aucune facture trouvée pour l'ID:", id);
         }
 
         setChargement(false);
       } catch (erreur) {
-        console.error('❌ Erreur lors de la récupération des données:', erreur);
+        console.error('Erreur lors de la récupération des données:', erreur);
         setChargement(false);
       }
     };
@@ -177,10 +177,10 @@ export default function PageFacture() {
         montant: facture.montant_total,
         emailClient: client.email,
         nomClient: client.nom,
-        nomEmetteur: infoBancaire.nom_compte,
+        nomEmetteur: infoBancaire.nom_compte, // Utiliser le nom du compte bancaire
         numeroCompte: infoBancaire.numero_compte,
-        devise: infoBancaire.devise,
-        dateCreation: new Date(facture.cree_le).toLocaleDateString('fr-FR'),
+        devise: infoBancaire.devise, // Utiliser la devise des infos bancaires
+        dateCreation: new Date(facture.cree_le).toLocaleDateString('fr-FR'), // Utiliser cree_le
       };
 
       console.log("📤 Envoi avec les données:", donneesEmail);
@@ -194,16 +194,22 @@ export default function PageFacture() {
       });
 
       const data = await response.json();
+      console.log("📧 Réponse complète de l'API:", data);
+      console.log("📊 Status de la réponse:", response.status);
       
       if (response.ok) {
         alert("✅ Email envoyé avec succès !");
         console.log("Email envoyé:", data);
       } else {
-        alert("❌ Erreur lors de l'envoi : " + data.message);
-        console.error("Erreur envoi:", data);
+        console.error("❌ Erreur API:", {
+          status: response.status,
+          statusText: response.statusText,
+          data: data
+        });
+        alert(`❌ Erreur lors de l'envoi : ${data.message || 'Erreur inconnue'}`);
       }
     } catch (error) {
-      console.error("❌ Erreur réseau:", error);
+      console.error(" Erreur réseau:", error);
       alert("Erreur de connexion lors de l'envoi de l'email");
     }
   };
