@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getClientUnique } from "@/db/actions";
+import { getClientUnique } from "@/lib/actions";
 
 export async function GET(req: NextRequest) {
    const nomClient = req.nextUrl.searchParams.get("name");

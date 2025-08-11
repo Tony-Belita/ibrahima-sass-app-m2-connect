@@ -103,6 +103,27 @@ export default function TableauDeBord() {
   const [clients, setClients] = useState([]);
   const router = useRouter();
 
+  // Fonction pour récupérer la liste des clients
+  const recupererClients = useCallback(async () => {
+    try {
+      const response = await fetch('/api/clients?userID=user_123');
+      const data = await response.json();
+      
+      if (response.ok) {
+        setClients(data.clients || []);
+      } else {
+        console.error("Erreur lors de la récupération des clients:", data.message);
+      }
+    } catch (error) {
+      console.error("Erreur réseau lors de la récupération des clients:", error);
+    }
+  }, []);
+
+  // Récupérer les clients au chargement de la page
+  useEffect(() => {
+    recupererClients();
+  }, [recupererClients]);
+
   // Fonction pour ajouter un article à la liste
   const gererAjoutArticle = (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,15 +152,61 @@ export default function TableauDeBord() {
   };
 
   // Fonction pour soumettre le formulaire de facture
-  const gererSoumissionFormulaire = (e: React.FormEvent<HTMLFormElement>) => {
+  const gererSoumissionFormulaire = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Création de la facture...");
-    console.log({
-      client,
-      titreFacture,
-      articles: listeArticles,
-      montantTotal: obtenirMontantTotal()
-    });
+    
+    if (listeArticles.length === 0) {
+      alert("Veuillez ajouter au moins un article à la facture");
+      return;
+    }
+
+    if (!client || !titreFacture) {
+      alert("Veuillez remplir tous les champs obligatoires");
+      return;
+    }
+
+    try {
+      console.log("Création de la facture...");
+      
+      const factureData = {
+        customer: parseInt(client), // ID du client sélectionné
+        title: titreFacture,
+        items: listeArticles,
+        total: obtenirMontantTotal(),
+        ownerID: 'user_123' // Remplacez par l'ID utilisateur réel
+      };
+
+      const response = await fetch('/api/facture', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(factureData),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log("Facture créée avec succès:", data);
+        
+        // Rediriger vers la page de prévisualisation de la facture
+        if (data.facture && data.facture.id) {
+          router.push(`/facture/${data.facture.id}`);
+        } else {
+          alert("Facture créée avec succès !");
+          // Réinitialiser le formulaire
+          setListeArticles([]);
+          setClient("");
+          setTitreFacture("");
+        }
+      } else {
+        console.error("Erreur lors de la création:", data.message);
+        alert("Erreur lors de la création de la facture: " + data.message);
+      }
+    } catch (error) {
+      console.error("Erreur réseau:", error);
+      alert("Erreur de connexion lors de la création de la facture");
+    }
   };
 
   // Configuration des liens de navigation
@@ -208,9 +275,9 @@ export default function TableauDeBord() {
                     onChange={(e) => setClient(e.target.value)}
                   >
                     <option value="">Choisir un client</option>
-                    {clients.map((client: any) => (
-                      <option key={client.id} value={client.name}>
-                        {client.name}
+                    {clients.map((clientItem: any) => (
+                      <option key={clientItem.id} value={clientItem.id}>
+                        {clientItem.nom} - {clientItem.email}
                       </option>
                     ))}
                   </select>

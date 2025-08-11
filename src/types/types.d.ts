@@ -9,28 +9,38 @@ interface Article {
 
 // Interface représentant une facture complète
 interface Facture {
-    id?: string;             // Identifiant unique de la facture 
-    date_creation?: string;  // Date de création de la facture 
-    id_utilisateur: string;  // Identifiant de l'utilisateur qui crée la facture
+    id: number;              // Identifiant unique de la facture 
+    id_proprietaire: string; // Identifiant du propriétaire/utilisateur
     id_client: number;       // Identifiant du client associé à la facture
     titre: string;           // Titre ou référence de la facture
     articles: string;        // Liste des articles (stockée en JSON stringifié)
-    montant_total: number;   // Montant total de la facture
+    montant_total: string;   // Montant total de la facture (Decimal en string)
+    cree_le: string;         // Date de création de la facture
+    client?: {               // Information du client (via relation Prisma)
+        id: number;
+        nom: string;
+        email: string;
+        adresse: string;
+    };
 }
 
 // Interface représentant un client
 interface Client {
-    id_utilisateur: string;  // Identifiant de l'utilisateur propriétaire du client
+    id: number;              // Identifiant unique du client
+    id_proprietaire: string; // Identifiant de l'utilisateur propriétaire du client
     nom: string;             // Nom du client
     email: string;           // Adresse email du client
     adresse: string;         // Adresse postale du client
+    cree_le: string;         // Date de création
 }
 
 // Interface représentant les informations bancaires de l'utilisateur
 interface InfoBancaire {
-    id_utilisateur: string;  // Identifiant de l'utilisateur
-    nom_compte: string;      // Nom du titulaire du compte
-    numero_compte: number;   // Numéro de compte
+    id: number;              // Identifiant unique
+    id_proprietaire: string; // Identifiant de l'utilisateur
     nom_banque: string;      // Nom de la banque
-    devise: string;          // Devise utilisée (EUR, USD)
+    numero_compte: string;   // Numéro de compte bancaire
+    nom_compte: string;      // Nom du compte
+    devise: string;          // Devise utilisée
+    cree_le: string;         // Date de création
 }

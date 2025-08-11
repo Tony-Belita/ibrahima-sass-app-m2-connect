@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getFactureUnique } from "@/db/actions";
+import { getFactureUnique } from "@/lib/actions";
 
 export async function GET(req: NextRequest) {
     const factureID = req.nextUrl.searchParams.get("id");

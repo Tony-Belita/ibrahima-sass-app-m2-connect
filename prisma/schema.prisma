@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("NEON_DATABASE_URL")
+}
+
+model Facture {
+  id               Int      @id @default(autoincrement())
+  id_proprietaire  String
+  id_client        Int
+  titre            String
+  articles         Json
+  montant_total    Decimal  @db.Decimal(10, 2)
+  cree_le          DateTime @default(now())
+  
+  // Relation avec le client
+  client           Client   @relation(fields: [id_client], references: [id])
+  
+  @@map("tableFactures")
+}
+
+model Client {
+  id              Int      @id @default(autoincrement())
+  id_proprietaire String
+  nom             String
+  email           String
+  adresse         String
+  cree_le         DateTime @default(now())
+  
+  // Relation avec les factures
+  factures        Facture[]
+  
+  @@map("tableClients")
+}
+
+model InfosBancaires {
+  id              Int      @id @default(autoincrement())
+  id_proprietaire String   @unique
+  nom_banque      String
+  numero_compte   String
+  nom_compte      String
+  devise          String
+  cree_le         DateTime @default(now())
+  
+  @@map("tableInfosBancaires")
+}

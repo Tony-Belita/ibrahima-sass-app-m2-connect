@@ -17,7 +17,7 @@ export default function Parametres() {
     // État par défaut des informations bancaires
     const [infoBancaire, setInfoBancaire] = useState({
         nom_compte: "",
-        numero_compte: 1234567890,
+        numero_compte: "",
         nom_banque: "",
         devise: "",
     });
@@ -25,10 +25,34 @@ export default function Parametres() {
     // Informations bancaires du formulaire
     const [saisieInfoBancaire, setSaisieInfoBancaire] = useState({
         nomCompte: "",
-        numeroCompte: 1234567890,
+        numeroCompte: "",
         nomBanque: "",
         devise: "",
     });
+
+    // Fonction pour récupérer les informations bancaires
+    const recupererInfosBancaires = useCallback(async () => {
+        try {
+            const response = await fetch('/api/bank-info?userID=user_123');
+            const data = await response.json();
+            
+            if (response.ok && data.infosBancaires) {
+                setInfoBancaire({
+                    nom_compte: data.infosBancaires.nom_compte || "",
+                    numero_compte: data.infosBancaires.numero_compte || "",
+                    nom_banque: data.infosBancaires.nom_banque || "",
+                    devise: data.infosBancaires.devise || "",
+                });
+            }
+        } catch (error) {
+            console.error("Erreur lors de la récupération des infos bancaires:", error);
+        }
+    }, []);
+
+    // Récupérer les informations bancaires au chargement de la page
+    useEffect(() => {
+        recupererInfosBancaires();
+    }, [recupererInfosBancaires]);
 
     // Met à jour l'état du formulaire
     const gererMiseAJourInfoBancaire = (
@@ -65,6 +89,20 @@ export default function Parametres() {
             
             if (response.ok) {
                 console.log("Informations bancaires mises à jour:", data.message);
+                // Mettre à jour l'affichage avec les nouvelles informations
+                setInfoBancaire({
+                    nom_compte: saisieInfoBancaire.nomCompte,
+                    numero_compte: saisieInfoBancaire.numeroCompte,
+                    nom_banque: saisieInfoBancaire.nomBanque,
+                    devise: saisieInfoBancaire.devise,
+                });
+                // Vider le formulaire
+                setSaisieInfoBancaire({
+                    nomCompte: "",
+                    numeroCompte: "",
+                    nomBanque: "",
+                    devise: "",
+                });
                 // Optionnel: afficher un message de succès à l'utilisateur
             } else {
                 console.error("Erreur lors de la mise à jour:", data.message);
@@ -167,7 +205,7 @@ export default function Parametres() {
                                 Numéro de compte
                             </label>
                             <input
-                                type="number"
+                                type="text"
                                 name="numeroCompte"
                                 id="numeroCompte"
                                 className="border-[1px] border-gray-300 dark:border-gray-600 p-2 rounded mb-3 bg-white dark:bg-gray-800"

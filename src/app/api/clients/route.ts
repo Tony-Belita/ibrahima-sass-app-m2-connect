@@ -1,4 +1,4 @@
-import { supprimerClient, ajouterClient, getClients } from "@/db/actions";
+import { supprimerClient, ajouterClient, getClients } from "@/lib/actions";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {

@@ -67,7 +67,7 @@ const ComposantAImprimer = forwardRef<HTMLDivElement, PropsImpression>((props, r
             <h2 className='text-lg font-semibold mb-3'>FACTURE #0{id}</h2>
             <section className='mb-6'>
               <p className='opacity-60'>Nom de l'émetteur: {infoBancaire?.nom_compte}</p>
-              <p className='opacity-60'>Date: {facture?.date_creation ? formaterDateString(facture.date_creation) : 'N/A'}</p>
+              <p className='opacity-60'>Date: {facture?.cree_le ? formaterDateString(facture.cree_le) : 'N/A'}</p>
             </section>
             <h2 className='text-lg font-semibold mb-2'>DESTINATAIRE:</h2>
             <section className='mb-6'>
@@ -112,22 +112,24 @@ export default function PageFacture() {
   useEffect(() => {
     const recupererDonneesFacture = async () => {
       try {
-        // Récupérer la facture
+        // Récupérer la facture avec les informations du client (via relation Prisma)
         const reponseFacture = await fetch(`/api/facture/single?id=${id}`);
         const donneesFacture = await reponseFacture.json();
-        setFacture(donneesFacture.facture[0]);
+        
+        if (donneesFacture.facture && donneesFacture.facture.length > 0) {
+          const factureData = donneesFacture.facture[0];
+          setFacture(factureData);
+          
+          // Le client est déjà inclus dans la réponse grâce à la relation Prisma
+          if (factureData.client) {
+            setClient(factureData.client);
+          }
 
-        // Récupérer les informations du client
-        if (donneesFacture.facture[0]?.id_client) {
-          const reponseClient = await fetch(`/api/clients/single?name=${donneesFacture.facture[0].id_client}`);
-          const donneesClient = await reponseClient.json();
-          setClient(donneesClient.client[0]);
+          // Récupérer les informations bancaires
+          const reponseInfoBancaire = await fetch(`/api/bank-info?userID=${factureData.id_proprietaire}`);
+          const donneesInfoBancaire = await reponseInfoBancaire.json();
+          setInfoBancaire(donneesInfoBancaire.infosBancaires);
         }
-
-        // Récupérer les informations bancaires
-        const reponseInfoBancaire = await fetch(`/api/bank-info?userID=${donneesFacture.facture[0]?.id_proprietaire}`);
-        const donneesInfoBancaire = await reponseInfoBancaire.json();
-        setInfoBancaire(donneesInfoBancaire.infosBancaires[0]);
 
         setChargement(false);
       } catch (erreur) {

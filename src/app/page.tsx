@@ -2,17 +2,8 @@ import Link from "next/link";
 import { Boxes } from "@/components/ui/background-boxes";
 import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
 import { SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
-import { obtenirVersionBD } from "@/db";
 
 export default async function Accueil() {
-  // Test de connexion à la base de données lors du chargement de la page
-  try {
-    const { version } = await obtenirVersionBD();
-    console.log('Version de la base de données:', { version });
-  } catch (erreur) {
-    console.error('Erreur de connexion à la base de données:', erreur);
-  }
-
   // Mots pour l'effet Typewriter
   const mots = [
     {
