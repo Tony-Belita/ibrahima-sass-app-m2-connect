@@ -20,53 +20,30 @@ import {
 export default function Historique() {
   const [factures, setFactures] = useState<Facture[]>([]);
   const [chargement, setChargement] = useState<boolean>(true);
+  const [erreur, setErreur] = useState<string>("");
 
-  // Simulation de données de factures pour démonstration
-  useEffect(() => {
-    // Simulation du chargement des factures depuis l'API
-    setTimeout(() => {
-      const facturesSimulees: Facture[] = [
-        {
-          id: "001",
-          date_creation: "2025-01-15T10:30:00Z",
-          id_utilisateur: "user123",
-          id_client: 1,
-          titre: "Services de développement web",
-          articles: JSON.stringify([
-            { nom: "Développement site vitrine", coût: 1500, quantite: 1 },
-            { nom: "Formation CMS", coût: 500, quantite: 2 }
-          ]),
-          montant_total: 2500
-        },
-        {
-          id: "002",
-          date_creation: "2025-01-10T14:45:00Z",
-          id_utilisateur: "user123",
-          id_client: 2,
-          titre: "Maintenance mensuelle",
-          articles: JSON.stringify([
-            { nom: "Maintenance serveur", coût: 200, quantite: 1 },
-            { nom: "Mise à jour sécurité", coût: 150, quantite: 1 }
-          ]),
-          montant_total: 350
-        },
-        {
-          id: "003",
-          date_creation: "2025-01-05T09:15:00Z",
-          id_utilisateur: "user123",
-          id_client: 3,
-          titre: "Consultation stratégique",
-          articles: JSON.stringify([
-            { nom: "Audit SEO", coût: 800, quantite: 1 },
-            { nom: "Recommandations", coût: 400, quantite: 1 }
-          ]),
-          montant_total: 1200
-        }
-      ];
-      setFactures(facturesSimulees);
+  // Récupération des vraies factures depuis la base de données
+  const recupererFactures = useCallback(async () => {
+    try {
+      const response = await fetch('/api/facture?userID=user_123');
+      const data = await response.json();
+      
+      if (response.ok) {
+        setFactures(data.factures || []);
+      } else {
+        setErreur(data.message || "Erreur lors de la récupération des factures");
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération des factures:", error);
+      setErreur("Erreur de connexion");
+    } finally {
       setChargement(false);
-    }, 1000);
+    }
   }, []);
+
+  useEffect(() => {
+    recupererFactures();
+  }, [recupererFactures]);
 
   // Fonction pour formater la date en français
   const formaterDate = (dateString: string) => {
@@ -78,14 +55,12 @@ export default function Historique() {
     });
   };
 
-  // Fonction pour obtenir le nom du client (simulation)
-  const obtenirNomClient = (idClient: number) => {
-    const clients = {
-      1: "Entreprise ABC",
-      2: "Société XYZ",
-      3: "Start-up Innovation"
-    };
-    return clients[idClient as keyof typeof clients] || `Client #${idClient}`;
+  // Fonction pour obtenir le nom du client depuis les données de la facture
+  const obtenirNomClient = (facture: Facture) => {
+    if (facture.client) {
+      return facture.client.nom;
+    }
+    return `Client #${facture.id_client}`;
   };
 
   // Configuration des liens de navigation
@@ -107,7 +82,7 @@ export default function Historique() {
     },
     {
       label: "Factures",
-      href: "/invoice",
+      href: "/facture",
       icon: <IconFileInvoice className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
     },
     {
@@ -153,6 +128,10 @@ export default function Historique() {
                   Chargement des factures...
                 </span>
               </div>
+            ) : erreur ? (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+                <p className="text-red-800">{erreur}</p>
+              </div>
             ) : (
               <>
                 {/* Statistiques rapides */}
@@ -179,7 +158,7 @@ export default function Historique() {
                           Chiffre d'affaires total
                         </p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                          {factures.reduce((total, facture) => total + facture.montant_total, 0).toLocaleString("fr-FR")} €
+                          {factures.reduce((total, facture) => total + parseFloat(facture.montant_total), 0).toLocaleString("fr-FR")} €
                         </p>
                       </div>
                     </div>
@@ -225,7 +204,7 @@ export default function Historique() {
                                 Facture #{facture.id}
                               </span>
                               <span className="text-sm text-gray-500 dark:text-gray-400">
-                                {formaterDate(facture.date_creation!)}
+                                {formaterDate(facture.cree_le)}
                               </span>
                             </div>
                             
@@ -236,25 +215,20 @@ export default function Historique() {
                             <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                               Émise pour{" "}
                               <span className="font-semibold text-gray-900 dark:text-white">
-                                {obtenirNomClient(facture.id_client)}
+                                {obtenirNomClient(facture)}
                               </span>
                             </p>
                             
                             <div className="flex items-center gap-2">
                               <IconCurrencyEuro className="h-4 w-4 text-green-600 dark:text-green-400" />
                               <span className="text-xl font-bold text-green-600 dark:text-green-400">
-                                {facture.montant_total.toLocaleString("fr-FR")} €
+                                {parseFloat(facture.montant_total).toLocaleString("fr-FR")} €
                               </span>
                             </div>
                           </div>
 
                           {/* Bouton avec style "Brutal" */}
-                          <Link
-                            href={{
-                              pathname: `/invoice/${facture.id}`,
-                              query: { client: facture.id_client },
-                            }}
-                          >
+                          <Link href={`/facture/${facture.id}`}>
                             <button className="px-8 py-3 border-2 border-black dark:border-white uppercase bg-white dark:bg-gray-900 text-black dark:text-white transition duration-200 text-sm font-bold shadow-[1px_1px_rgba(0,0,0),2px_2px_rgba(0,0,0),3px_3px_rgba(0,0,0),4px_4px_rgba(0,0,0),5px_5px_0px_0px_rgba(0,0,0)] dark:shadow-[1px_1px_rgba(255,255,255),2px_2px_rgba(255,255,255),3px_3px_rgba(255,255,255),4px_4px_rgba(255,255,255),5px_5px_0px_0px_rgba(255,255,255)] hover:shadow-[1px_1px_rgba(0,0,0),2px_2px_rgba(0,0,0),3px_3px_rgba(0,0,0),4px_4px_rgba(0,0,0),5px_5px_0px_0px_rgba(0,0,0)] dark:hover:shadow-[1px_1px_rgba(255,255,255),2px_2px_rgba(255,255,255),3px_3px_rgba(255,255,255),4px_4px_rgba(255,255,255),5px_5px_0px_0px_rgba(255,255,255)] active:shadow-none active:translate-x-1 active:translate-y-1">
                               <IconEye className="inline h-4 w-4 mr-2" />
                               Prévisualiser
