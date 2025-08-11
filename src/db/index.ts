@@ -2,20 +2,25 @@ import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { tableFactures, tableClients, tableInfosBancaires } from './schema';
 
-// Vérification de la présence de l'URL de la base de données Neon
 if (!process.env.NEON_DATABASE_URL) {
-  throw new Error('NEON_DATABASE_URL doit être une chaîne de connexion Postgres Neon valide');
+  throw new Error('DATABASE_URL must be a Neon postgres connection string')
 }
 
-/**
- * Instance de connexion SQL réutilisable pour les requêtes
- * Utilise la variable d'environnement NEON_DATABASE_URL
- */
-export const sql = neon(process.env.NEON_DATABASE_URL!);
+const sql = neon(process.env.NEON_DATABASE_URL!);
 
-/**
- * Instance Drizzle ORM pour les opérations de base de données
- */
+export const facturesDB = drizzle(sql, {
+  schema: { tableFactures }
+});
+
+export const clientsDB = drizzle(sql, {
+  schema: { tableClients }
+});
+
+export const infosBancairesDB = drizzle(sql, {
+  schema: { tableInfosBancaires }
+});
+
+// Instance Drizzle ORM globale pour les opérations de base de données
 export const db = drizzle(sql, {
   schema: {
     tableFactures,
@@ -50,10 +55,10 @@ export const obtenirVersionBD = async (): Promise<{ version: string }> => {
 export const testerConnexionBD = async (): Promise<boolean> => {
   try {
     await obtenirVersionBD();
-    console.log('✅ Connexion à la base de données Neon établie avec succès');
+    console.log(' Connexion à la base de données Neon établie avec succès');
     return true;
   } catch (erreur) {
-    console.error('❌ Échec de la connexion à la base de données:', erreur);
+    console.error(' Échec de la connexion à la base de données:', erreur);
     return false;
   }
 };
@@ -65,6 +70,9 @@ export const testerConnexionBD = async (): Promise<boolean> => {
 export default {
   sql,
   db,
+  facturesDB,
+  clientsDB,
+  infosBancairesDB,
   obtenirVersionBD,
   testerConnexionBD,
 };
