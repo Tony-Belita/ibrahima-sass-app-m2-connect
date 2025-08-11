@@ -97,8 +97,8 @@ export default function TableauDeBord() {
   const [listeArticles, setListeArticles] = useState<Article[]>([]);
   const [client, setClient] = useState<string>("");
   const [titreFacture, setTitreFacture] = useState<string>("");
-  const [coutArticle, setCoutArticle] = useState<number>(0);
-  const [quantiteArticle, setQuantiteArticle] = useState<number>(1);
+  const [coutArticle, setCoutArticle] = useState<string>("");
+  const [quantiteArticle, setQuantiteArticle] = useState<string>("1");
   const [nomArticle, setNomArticle] = useState<string>("");
   const [clients, setClients] = useState([]);
   const router = useRouter();
@@ -107,21 +107,21 @@ export default function TableauDeBord() {
   const gererAjoutArticle = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (nomArticle.trim() && coutArticle > 0 && quantiteArticle >= 1) {
+    if (nomArticle.trim() && parseFloat(coutArticle) > 0 && parseInt(quantiteArticle) >= 1) {
       const nouvelArticle: Article = {
         id: Math.random().toString(36).substring(2, 9),
         nom: nomArticle,
-        coût: coutArticle,
-        quantite: quantiteArticle,
-        prix: coutArticle * quantiteArticle,
+        coût: parseFloat(coutArticle),
+        quantite: parseInt(quantiteArticle),
+        prix: parseFloat(coutArticle) * parseInt(quantiteArticle),
       };
       
       setListeArticles([...listeArticles, nouvelArticle]);
       
       // Réinitialiser les champs
       setNomArticle("");
-      setCoutArticle(0);
-      setQuantiteArticle(1);
+      setCoutArticle("");
+      setQuantiteArticle("1");
     }
   };
 
@@ -161,7 +161,7 @@ export default function TableauDeBord() {
     },
     {
       label: "Factures",
-      href: "/invoice",
+      href: "/facture",
       icon: <IconFileInvoice className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
     },
     {
@@ -264,7 +264,7 @@ export default function TableauDeBord() {
                       step="0.01"
                       className="w-full py-3 px-4 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       value={coutArticle}
-                      onChange={(e) => setCoutArticle(Number(e.target.value))}
+                      onChange={(e) => setCoutArticle(e.target.value)}
                     />
                   </div>
 
@@ -279,7 +279,7 @@ export default function TableauDeBord() {
                       min="1"
                       className="w-full py-3 px-4 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       value={quantiteArticle}
-                      onChange={(e) => setQuantiteArticle(Number(e.target.value))}
+                      onChange={(e) => setQuantiteArticle(e.target.value)}
                     />
                   </div>
 
@@ -288,7 +288,7 @@ export default function TableauDeBord() {
                       Prix total
                     </label>
                     <div className="w-full py-3 px-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-600 dark:to-gray-700 border border-blue-200 dark:border-gray-600 rounded-lg text-blue-800 dark:text-blue-200 font-semibold">
-                      {(coutArticle * quantiteArticle).toLocaleString("fr-FR")} €
+                      {(parseFloat(coutArticle || "0") * parseInt(quantiteArticle || "1")).toLocaleString("fr-FR")} €
                     </div>
                   </div>
                 </div>

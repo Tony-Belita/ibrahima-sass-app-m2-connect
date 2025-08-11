@@ -42,10 +42,36 @@ export default function Parametres() {
     };
 
     // Gère la soumission du formulaire
-    const gererSoumission = (e: React.FormEvent<HTMLFormElement>) => {
+    const gererSoumission = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log("Tentative de mise à jour des informations bancaires...");
-        // Ici, on mettrait à jour la base de données
+        
+        try {
+            const response = await fetch('/api/bank-info', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userID: 'user_123', // Remplacez par l'ID utilisateur réel
+                    accountName: saisieInfoBancaire.nomCompte,
+                    accountNumber: saisieInfoBancaire.numeroCompte,
+                    bankName: saisieInfoBancaire.nomBanque,
+                    currency: saisieInfoBancaire.devise,
+                }),
+            });
+
+            const data = await response.json();
+            
+            if (response.ok) {
+                console.log("Informations bancaires mises à jour:", data.message);
+                // Optionnel: afficher un message de succès à l'utilisateur
+            } else {
+                console.error("Erreur lors de la mise à jour:", data.message);
+            }
+        } catch (error) {
+            console.error("Erreur réseau:", error);
+        }
     };
 
     // Configuration des liens de navigation
@@ -67,7 +93,7 @@ export default function Parametres() {
         },
         {
             label: "Factures",
-            href: "/invoice",
+            href: "/facture",
             icon: <IconFileInvoice className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
         },
         {

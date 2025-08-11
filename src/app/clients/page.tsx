@@ -13,14 +13,14 @@ import {
   IconFileInvoice 
 } from "@tabler/icons-react";
 
-// Composant pour le tableau des clients (à créer plus tard)
+// Composant pour le tableau des clients
 const TableauClients = ({ clients }: { clients: any[] }) => {
   return (
     <div className="w-full mt-6">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Liste des clients
+            Liste des clients ({clients.length})
           </h3>
         </div>
         {clients.length === 0 ? (
@@ -30,11 +30,37 @@ const TableauClients = ({ clients }: { clients: any[] }) => {
             </p>
           </div>
         ) : (
-          <div className="px-6 py-4">
-            {/* Ici on affichera la liste des clients */}
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              {clients.length} client(s) enregistré(s)
-            </p>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                    Nom
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                    Email
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                    Adresse
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {clients.map((client, index) => (
+                  <tr key={index}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                      {client.nom}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                      {client.email}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                      {client.adresse}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
@@ -49,24 +75,60 @@ export default function Clients() {
   const [chargement, setChargement] = useState<boolean>(false);
   const [clients, setClients] = useState([]);
 
-  const gererAjoutClient = (e: React.FormEvent<HTMLFormElement>) => {
+  // Charger les clients au montage du composant
+  useEffect(() => {
+    chargerClients();
+  }, []);
+
+  const chargerClients = async () => {
+    try {
+      // Remplacez "user_123" par l'ID utilisateur réel (à récupérer depuis Clerk)
+      const response = await fetch('/api/clients?userID=user_123');
+      const data = await response.json();
+      if (response.ok) {
+        setClients(data.clients);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des clients:', error);
+    }
+  };
+
+  const gererAjoutClient = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setChargement(true);
     
-    // Simulation de l'ajout d'un client
-    console.log("Ajout du client:", {
-      nom: nomClient,
-      email: emailClient,
-      adresse: adresseClient
-    });
-    
-    // Réinitialiser le formulaire après l'ajout
-    setTimeout(() => {
-      setNomClient("");
-      setEmailClient("");
-      setAdresseClient("");
+    try {
+      const response = await fetch('/api/clients', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userID: 'user_123', // Remplacez par l'ID utilisateur réel
+          customerName: nomClient,
+          customerEmail: emailClient,
+          customerAddress: adresseClient,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log("Client ajouté avec succès:", data.message);
+        // Réinitialiser le formulaire
+        setNomClient("");
+        setEmailClient("");
+        setAdresseClient("");
+        // Recharger la liste des clients
+        await chargerClients();
+      } else {
+        console.error("Erreur lors de l'ajout:", data.message);
+      }
+    } catch (error) {
+      console.error("Erreur réseau:", error);
+    } finally {
       setChargement(false);
-    }, 1000);
+    }
   };
 
   // Configuration des liens de navigation
@@ -88,7 +150,7 @@ export default function Clients() {
     },
     {
       label: "Factures",
-      href: "/invoice",
+      href: "/facture",
       icon: <IconFileInvoice className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
     },
     {
