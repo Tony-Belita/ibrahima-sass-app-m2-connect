@@ -59,6 +59,14 @@ const TableauFacture = ({ listeArticles }: { listeArticles: Article[] }) => {
 const ComposantAImprimer = forwardRef<HTMLDivElement, PropsImpression>((props, ref) => {
   const { id, client, facture, infoBancaire } = props as PropsImpression;
 
+  // Debug pour voir les données reçues
+  console.log("🖨️ Données reçues dans ComposantAImprimer:", {
+    id,
+    client,
+    facture,
+    infoBancaire
+  });
+
   return (
     <div className='w-full px-2 py-8' ref={ref}>
       <div className='lg:w-2/3 w-full mx-auto shadow-md border-[1px] rounded min-h-[75vh] p-5 bg-white'>
@@ -79,7 +87,7 @@ const ComposantAImprimer = forwardRef<HTMLDivElement, PropsImpression>((props, r
 
           <div className='w-1/5 flex flex-col'>
             <p className='font-extrabold text-2xl'>
-              {`${infoBancaire?.devise || '€'}${Number(facture?.montant_total).toLocaleString()}`}
+              {`${infoBancaire?.devise || '€'}${facture?.montant_total ? parseFloat(facture.montant_total).toLocaleString('fr-FR') : '0'}`}
             </p>
             <p className='text-sm opacity-60'>Montant total</p>
           </div>
@@ -112,28 +120,37 @@ export default function PageFacture() {
   useEffect(() => {
     const recupererDonneesFacture = async () => {
       try {
+        console.log("🔍 Récupération des données pour la facture ID:", id);
+        
         // Récupérer la facture avec les informations du client (via relation Prisma)
         const reponseFacture = await fetch(`/api/facture/single?id=${id}`);
         const donneesFacture = await reponseFacture.json();
         
+        console.log("📄 Réponse API facture:", donneesFacture);
+        
         if (donneesFacture.facture && donneesFacture.facture.length > 0) {
           const factureData = donneesFacture.facture[0];
+          console.log("✅ Données facture:", factureData);
           setFacture(factureData);
           
           // Le client est déjà inclus dans la réponse grâce à la relation Prisma
           if (factureData.client) {
+            console.log("👤 Données client:", factureData.client);
             setClient(factureData.client);
           }
 
           // Récupérer les informations bancaires
           const reponseInfoBancaire = await fetch(`/api/bank-info?userID=${factureData.id_proprietaire}`);
           const donneesInfoBancaire = await reponseInfoBancaire.json();
+          console.log("🏦 Réponse API infos bancaires:", donneesInfoBancaire);
           setInfoBancaire(donneesInfoBancaire.infosBancaires);
+        } else {
+          console.error("❌ Aucune facture trouvée pour l'ID:", id);
         }
 
         setChargement(false);
       } catch (erreur) {
-        console.error('Erreur lors de la récupération des données:', erreur);
+        console.error('❌ Erreur lors de la récupération des données:', erreur);
         setChargement(false);
       }
     };
@@ -145,8 +162,50 @@ export default function PageFacture() {
 
   // Fonction qui envoie la facture par email
   const gererEnvoiFacture = async () => {
-    // TODO: Implémenter l'envoi par email
-    console.log('Envoi de la facture par email...');
+    if (!facture || !client || !infoBancaire) {
+      alert("Impossible d'envoyer l'email : données manquantes");
+      return;
+    }
+
+    try {
+      console.log("📧 Préparation de l'envoi d'email...");
+      
+      const donneesEmail = {
+        factureID: facture.id,
+        articles: facture.articles, // Déjà en format JSON string
+        titreFacture: facture.titre,
+        montant: facture.montant_total,
+        emailClient: client.email,
+        nomClient: client.nom,
+        nomEmetteur: infoBancaire.nom_compte,
+        numeroCompte: infoBancaire.numero_compte,
+        devise: infoBancaire.devise,
+        dateCreation: new Date(facture.cree_le).toLocaleDateString('fr-FR'),
+      };
+
+      console.log("📤 Envoi avec les données:", donneesEmail);
+
+      const response = await fetch('/api/facture/envoi', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(donneesEmail),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        alert("✅ Email envoyé avec succès !");
+        console.log("Email envoyé:", data);
+      } else {
+        alert("❌ Erreur lors de l'envoi : " + data.message);
+        console.error("Erreur envoi:", data);
+      }
+    } catch (error) {
+      console.error("❌ Erreur réseau:", error);
+      alert("Erreur de connexion lors de l'envoi de l'email");
+    }
   };
 
   // Fonction qui imprime la facture
