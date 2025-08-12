@@ -14,6 +14,5 @@ describe('API Facture', () => {
     expect(mockFunction()).toBe('facture-test')
   })
 
-  // Tests plus spécifiques peuvent être ajoutés plus tard
-  // quand l'environnement de test pour Next.js API routes sera mieux configuré
+
 })

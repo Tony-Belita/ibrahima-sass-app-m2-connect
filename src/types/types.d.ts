@@ -1,10 +1,10 @@
 // Interface représentant un élément/article dans une facture
 interface Article {
-    id: string;              // Identifiant unique de l'article
+    id?: string;             // Identifiant unique de l'article (optionnel pour compatibilité)
     nom: string;             // Nom ou description de l'article
-    coût: number;            // Coût unitaire de l'article
+    coût?: number;           // Coût unitaire de l'article (optionnel pour compatibilité avec ancien format)
     quantite: number;        // Quantité commandée
-    prix: number;            // Prix total (coût * quantite)
+    prix?: number;           // Prix total (coût * quantite) ou prix unitaire selon le contexte
 }
 
 // Interface représentant une facture complète

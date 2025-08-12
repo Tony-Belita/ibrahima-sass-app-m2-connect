@@ -122,10 +122,14 @@ export default function TemplateEmailFacture({
                                     <Text style={styles.tableCellText}>{article.quantite}</Text>
                                 </Column>
                                 <Column style={{...styles.tableColumn, width: '20%'}}>
-                                    <Text style={styles.tableCellText}>{article.coût.toFixed(2)} {devise}</Text>
+                                    <Text style={styles.tableCellText}>
+                                        {(article.coût || (article.prix ? article.prix / article.quantite : 0) || 0).toFixed(2)} {devise}
+                                    </Text>
                                 </Column>
                                 <Column style={{...styles.tableColumn, width: '20%'}}>
-                                    <Text style={styles.tableCellText}>{article.prix.toFixed(2)} {devise}</Text>
+                                    <Text style={styles.tableCellText}>
+                                        {(article.prix || (article.coût ? article.coût * article.quantite : 0) || 0).toFixed(2)} {devise}
+                                    </Text>
                                 </Column>
                             </Row>
                         ))}

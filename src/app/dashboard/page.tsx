@@ -27,7 +27,11 @@ interface Client {
 // Composant temporaire pour le tableau des factures
 const TableauFactures = ({ listeArticles }: { listeArticles: Article[] }) => {
   const obtenirMontantTotal = () => {
-    return listeArticles.reduce((total, article) => total + article.prix, 0);
+    return listeArticles.reduce((total, article) => {
+      // Gérer les différents formats d'articles
+      const prixTotal = article.prix || (article.coût ? article.coût * article.quantite : 0) || 0;
+      return total + prixTotal;
+    }, 0);
   };
 
   return (
@@ -65,22 +69,29 @@ const TableauFactures = ({ listeArticles }: { listeArticles: Article[] }) => {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {listeArticles.map((article) => (
-                  <tr key={article.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                      {article.nom}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {article.coût.toLocaleString("fr-FR")} €
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {article.quantite}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                      {article.prix.toLocaleString("fr-FR")} €
-                    </td>
-                  </tr>
-                ))}
+                {listeArticles.map((article, index) => {
+                  // Gérer les différents formats d'articles (coût vs prix unitaire)
+                  const coutUnitaire = article.coût || (article.prix ? article.prix / article.quantite : 0) || 0;
+                  const prixTotal = article.prix || (article.coût ? article.coût * article.quantite : 0) || 0;
+                  const articleId = article.id || `article-${index}`;
+                  
+                  return (
+                    <tr key={articleId}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                        {article.nom}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                        {coutUnitaire.toLocaleString("fr-FR")} €
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                        {article.quantite}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                        {prixTotal.toLocaleString("fr-FR")} €
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
               <tfoot className="bg-gray-50 dark:bg-gray-700">
                 <tr>
@@ -155,7 +166,11 @@ export default function TableauDeBord() {
 
   // Fonction pour calculer le montant total
   const obtenirMontantTotal = () => {
-    return listeArticles.reduce((total, article) => total + article.prix, 0);
+    return listeArticles.reduce((total, article) => {
+      // Gérer les différents formats d'articles
+      const prixTotal = article.prix || (article.coût ? article.coût * article.quantite : 0) || 0;
+      return total + prixTotal;
+    }, 0);
   };
 
   // Fonction pour soumettre le formulaire de facture

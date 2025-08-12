@@ -40,14 +40,21 @@ const TableauFacture = ({ listeArticles }: { listeArticles: Article[] }) => {
             </tr>
           </thead>
           <tbody>
-            {listeArticles.map((article) => (
-              <tr key={article.id}>
-                <td className="border border-gray-300 px-4 py-2">{article.nom}</td>
-                <td className="border border-gray-300 px-4 py-2 text-right">{article.quantite}</td>
-                <td className="border border-gray-300 px-4 py-2 text-right">{article.coût.toFixed(2)}</td>
-                <td className="border border-gray-300 px-4 py-2 text-right">{article.prix.toFixed(2)}</td>
-              </tr>
-            ))}
+            {listeArticles.map((article, index) => {
+              // Gérer les différents formats d'articles (coût vs prix unitaire)
+              const coutUnitaire = article.coût || (article.prix ? article.prix / article.quantite : 0) || 0;
+              const prixTotal = article.prix || (article.coût ? article.coût * article.quantite : 0) || 0;
+              const articleId = article.id || `article-${index}`;
+              
+              return (
+                <tr key={articleId}>
+                  <td className="border border-gray-300 px-4 py-2">{article.nom}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-right">{article.quantite}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-right">{coutUnitaire.toFixed(2)}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-right">{prixTotal.toFixed(2)}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

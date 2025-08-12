@@ -83,14 +83,18 @@ export async function POST(req: NextRequest) {
                         </tr>
                     </thead>
                     <tbody>
-                        ${JSON.parse(articles).map((article: { nom: string; quantite: number; coût: number; prix: number }) => `
-                            <tr>
-                                <td>${article.nom}</td>
-                                <td>${article.quantite}</td>
-                                <td>${article.coût.toFixed(2)} ${devise}</td>
-                                <td>${article.prix.toFixed(2)} ${devise}</td>
-                            </tr>
-                        `).join('')}
+                        ${JSON.parse(articles).map((article: { nom: string; quantite: number; coût?: number; prix?: number }) => {
+                            const coutUnitaire = article.coût || (article.prix ? article.prix / article.quantite : 0) || 0;
+                            const prixTotal = article.prix || (article.coût ? article.coût * article.quantite : 0) || 0;
+                            return `
+                                <tr>
+                                    <td>${article.nom}</td>
+                                    <td>${article.quantite}</td>
+                                    <td>${coutUnitaire.toFixed(2)} ${devise}</td>
+                                    <td>${prixTotal.toFixed(2)} ${devise}</td>
+                                </tr>
+                            `;
+                        }).join('')}
                         <tr class="total">
                             <td colspan="3"><strong>Total général</strong></td>
                             <td><strong>${Number(montant).toFixed(2)} ${devise}</strong></td>

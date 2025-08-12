@@ -4,8 +4,10 @@ import { IconX, IconPlus, IconTrash } from "@tabler/icons-react";
 import Swal from 'sweetalert2';
 
 interface Article {
+  id?: string;
   nom: string;
-  prix: number;
+  coût?: number;
+  prix?: number;
   quantite: number;
 }
 
@@ -70,7 +72,12 @@ export const ModalFacture = ({ isOpen, onClose, facture, onSave }: ModalFactureP
   };
 
   const ajouterArticle = () => {
-    setArticles([...articles, { nom: "", prix: 0, quantite: 1 }]);
+    setArticles([...articles, { 
+      id: Math.random().toString(36).substring(2, 9),
+      nom: "", 
+      prix: 0, 
+      quantite: 1 
+    }]);
   };
 
   const supprimerArticle = (index: number) => {
@@ -84,7 +91,10 @@ export const ModalFacture = ({ isOpen, onClose, facture, onSave }: ModalFactureP
   };
 
   const calculerTotal = () => {
-    return articles.reduce((total, article) => total + (article.prix * article.quantite), 0);
+    return articles.reduce((total, article) => {
+      const prixUnitaire = article.prix || article.coût || 0;
+      return total + (prixUnitaire * article.quantite);
+    }, 0);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -245,7 +255,7 @@ export const ModalFacture = ({ isOpen, onClose, facture, onSave }: ModalFactureP
                     <div className="col-span-3">
                       <input
                         type="number"
-                        value={article.prix}
+                        value={article.prix || article.coût || 0}
                         onChange={(e) => modifierArticle(index, 'prix', Number(e.target.value))}
                         placeholder="Prix unitaire"
                         min="0"
@@ -256,7 +266,7 @@ export const ModalFacture = ({ isOpen, onClose, facture, onSave }: ModalFactureP
                     </div>
                     <div className="col-span-1">
                       <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        {(article.prix * article.quantite).toFixed(2)}€
+                        {((article.prix || article.coût || 0) * article.quantite).toFixed(2)}€
                       </span>
                     </div>
                     <div className="col-span-1">
