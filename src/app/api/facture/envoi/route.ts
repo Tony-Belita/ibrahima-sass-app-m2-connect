@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
                         </tr>
                     </thead>
                     <tbody>
-                        ${JSON.parse(articles).map((article: any) => `
+                        ${JSON.parse(articles).map((article: { nom: string; quantite: number; coût: number; prix: number }) => `
                             <tr>
                                 <td>${article.nom}</td>
                                 <td>${article.quantite}</td>

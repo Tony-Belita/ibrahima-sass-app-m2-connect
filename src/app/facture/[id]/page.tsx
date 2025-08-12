@@ -74,7 +74,7 @@ const ComposantAImprimer = forwardRef<HTMLDivElement, PropsImpression>((props, r
           <div className='w-4/5'>
             <h2 className='text-lg font-semibold mb-3'>FACTURE #0{id}</h2>
             <section className='mb-6'>
-              <p className='opacity-60'>Nom de l'émetteur: {infoBancaire?.nom_compte}</p>
+              <p className='opacity-60'>Nom de l&apos;émetteur: {infoBancaire?.nom_compte}</p>
               <p className='opacity-60'>Date: {facture?.cree_le ? formaterDateString(facture.cree_le) : 'N/A'}</p>
             </section>
             <h2 className='text-lg font-semibold mb-2'>DESTINATAIRE:</h2>

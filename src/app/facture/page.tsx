@@ -12,8 +12,6 @@ import {
   IconHistory,
   IconFileInvoice,
   IconEye,
-  IconDownload,
-  IconMail,
   IconEdit,
   IconTrash
 } from "@tabler/icons-react";
@@ -271,7 +269,7 @@ export default function PageFactures() {
             text: data.message || 'Erreur lors de la suppression de la facture',
           });
         }
-      } catch (error) {
+      } catch {
         await Swal.fire({
           icon: 'error',
           title: 'Erreur !',
@@ -286,7 +284,7 @@ export default function PageFactures() {
     setModalOuvert(true);
   };
 
-  const handleSaveFacture = (factureModifiee: any) => {
+  const handleSaveFacture = () => {
     // Recharger les factures après modification
     const recupererFactures = async () => {
       try {

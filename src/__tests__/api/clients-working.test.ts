@@ -131,7 +131,7 @@ describe('API Clients - Tests fonctionnels', () => {
     })
 
     it('devrait détecter les données manquantes', () => {
-      const incompleteData: any = {
+      const incompleteData: Record<string, unknown> = {
         user_id: 'user-123',
         name: 'Test Client',
         // email manquant

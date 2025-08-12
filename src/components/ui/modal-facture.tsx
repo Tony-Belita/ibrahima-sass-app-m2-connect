@@ -31,7 +31,7 @@ interface ModalFactureProps {
   isOpen: boolean;
   onClose: () => void;
   facture: Facture | null;
-  onSave: (factureModifiee: any) => void;
+  onSave: () => void;
 }
 
 export const ModalFacture = ({ isOpen, onClose, facture, onSave }: ModalFactureProps) => {
@@ -116,7 +116,7 @@ export const ModalFacture = ({ isOpen, onClose, facture, onSave }: ModalFactureP
           showConfirmButton: false,
           timer: 1500
         });
-        onSave(data.facture);
+        onSave();
         onClose();
       } else {
         await Swal.fire({
@@ -125,7 +125,7 @@ export const ModalFacture = ({ isOpen, onClose, facture, onSave }: ModalFactureP
           text: data.message || 'Erreur lors de la modification de la facture',
         });
       }
-    } catch (error) {
+    } catch {
       await Swal.fire({
         icon: 'error',
         title: 'Erreur !',

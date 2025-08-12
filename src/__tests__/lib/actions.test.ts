@@ -49,7 +49,7 @@ describe('Actions', () => {
       user_id: 'user-123',
       customer_id: 1,
       title: 'Facture Test',
-      items: [{ nom: 'Service', prix: 100, quantite: 1 }],
+      items: JSON.stringify([{ nom: 'Service', prix: 100, quantite: 1 }]),
       total_amount: 100,
     }
 
@@ -58,8 +58,8 @@ describe('Actions', () => {
       id_proprietaire: 'user-123',
       id_client: 1,
       titre: 'Facture Test',
-      articles: [{ nom: 'Service', prix: 100, quantite: 1 }],
-      montant_total: 100,
+      articles: JSON.stringify([{ nom: 'Service', prix: 100, quantite: 1 }]),
+      montant_total: '100',
       cree_le: new Date(),
       client: {
         id: 1,
@@ -81,7 +81,7 @@ describe('Actions', () => {
             id_client: mockFactureData.customer_id,
             titre: mockFactureData.title,
             articles: mockFactureData.items,
-            montant_total: mockFactureData.total_amount,
+            montant_total: mockFactureData.total_amount.toString(),
           },
         })
         expect(result).toEqual(mockFacture)
@@ -143,7 +143,7 @@ describe('Actions', () => {
         const updateData = {
           customer_id: 2,
           title: 'Facture Modifiée',
-          items: [{ nom: 'Service Modifié', prix: 150, quantite: 1 }],
+          items: JSON.stringify([{ nom: 'Service Modifié', prix: 150, quantite: 1 }]),
           total_amount: 150,
         }
         const updatedFacture = { ...mockFacture, ...updateData }
@@ -157,7 +157,7 @@ describe('Actions', () => {
             id_client: updateData.customer_id,
             titre: updateData.title,
             articles: updateData.items,
-            montant_total: updateData.total_amount,
+            montant_total: updateData.total_amount.toString(),
           },
         })
         expect(result).toEqual(updatedFacture)

@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -15,7 +17,12 @@
     "prisma:push": "dotenv -e .env.local -- prisma db push",
     "prisma:studio": "dotenv -e .env.local -- prisma studio",
     "prisma:migrate": "dotenv -e .env.local -- prisma migrate dev",
-    "email": "email dev --dir src/app/emails"
+    "prisma:reset": "dotenv -e .env.local -- prisma migrate reset",
+    "email": "email dev --dir src/app/emails",
+    "docker:build": "docker build -t saas-facturation .",
+    "docker:run": "docker run -p 3000:3000 saas-facturation",
+    "docker:compose": "docker-compose up --build",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.30.0",
@@ -24,6 +31,8 @@
     "@react-email/components": "0.5.0",
     "@tabler/icons-react": "^3.34.1",
     "@tailwindcss/cli": "^4.1.11",
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.1",
@@ -31,6 +40,7 @@
     "lucide-react": "^0.539.0",
     "motion": "^12.23.12",
     "next": "15.4.6",
+    "next-secure-headers": "^2.2.0",
     "prisma": "^6.13.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -38,7 +48,8 @@
     "react-to-print": "^3.1.1",
     "resend": "^6.0.1",
     "sweetalert2": "^11.22.3",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "zod": "^4.0.17"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

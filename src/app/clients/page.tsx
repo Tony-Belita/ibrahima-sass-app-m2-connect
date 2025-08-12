@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { 
   Sidebar, 
   SidebarBody, 
@@ -17,15 +17,24 @@ import {
 } from "@tabler/icons-react";
 import Swal from 'sweetalert2';
 
+// Type pour les clients
+interface Client {
+  id: number;
+  nom: string;
+  email: string;
+  adresse: string;
+  cree_le: string;
+}
+
 // Composant pour le tableau des clients
 const TableauClients = ({ 
   clients, 
   onSupprimer, 
   onModifier 
 }: { 
-  clients: any[]; 
+  clients: Client[]; 
   onSupprimer: (id: number) => void;
-  onModifier: (client: any) => void;
+  onModifier: (client: Client) => void;
 }) => {
   return (
     <div className="w-full mt-6">
@@ -106,8 +115,8 @@ export default function Clients() {
   const [emailClient, setEmailClient] = useState<string>("");
   const [adresseClient, setAdresseClient] = useState<string>("");
   const [chargement, setChargement] = useState<boolean>(false);
-  const [clients, setClients] = useState([]);
-  const [clientEnModification, setClientEnModification] = useState<any>(null);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [clientEnModification, setClientEnModification] = useState<Client | null>(null);
 
   // Charger les clients au montage du composant
   useEffect(() => {
@@ -122,8 +131,8 @@ export default function Clients() {
       if (response.ok) {
         setClients(data.clients);
       }
-    } catch (error) {
-      console.error('Erreur lors du chargement des clients:', error);
+    } catch {
+      console.error('Erreur lors du chargement des clients');
     }
   };
 
@@ -168,7 +177,7 @@ export default function Clients() {
           text: data.message || 'Erreur lors de l\'ajout du client',
         });
       }
-    } catch (error) {
+    } catch {
       await Swal.fire({
         icon: 'error',
         title: 'Erreur !',
@@ -181,6 +190,8 @@ export default function Clients() {
 
   const gererModificationClient = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!clientEnModification) return;
+    
     setChargement(true);
     
     try {
@@ -221,7 +232,7 @@ export default function Clients() {
           text: data.message || 'Erreur lors de la modification du client',
         });
       }
-    } catch (error) {
+    } catch {
       await Swal.fire({
         icon: 'error',
         title: 'Erreur !',
@@ -269,7 +280,7 @@ export default function Clients() {
             text: data.message || 'Erreur lors de la suppression du client',
           });
         }
-      } catch (error) {
+      } catch {
         await Swal.fire({
           icon: 'error',
           title: 'Erreur !',
@@ -279,7 +290,7 @@ export default function Clients() {
     }
   };
 
-  const commencerModification = (client: any) => {
+  const commencerModification = (client: Client) => {
     setClientEnModification(client);
     setNomClient(client.nom);
     setEmailClient(client.email);

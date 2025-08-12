@@ -1,51 +1,107 @@
 import { prisma } from "@/lib/prisma";
+import { 
+  validateAndSanitize,
+  sanitizeString,
+  escapeHtml
+} from "@/lib/validation";
+import { z } from 'zod';
 
 // ===== ACTIONS POUR LES FACTURES =====
 
-// Créer une nouvelle facture
+// Créer une nouvelle facture avec validation
 export const creerFacture = async (facture: {
   user_id: string;
   customer_id: number;
   title: string;
-  items: any;
+  items: string;
   total_amount: number;
 }) => {
-  return await prisma.facture.create({
-    data: {
-      id_proprietaire: facture.user_id,
-      id_client: facture.customer_id,
-      titre: facture.title,
-      articles: facture.items,
-      montant_total: facture.total_amount,
-    },
-  });
+  try {
+    // Validation des données d'entrée
+    const validatedData = validateAndSanitize(z.object({
+      user_id: z.string().min(1, 'ID utilisateur requis'),
+      customer_id: z.number().int().positive('ID client invalide'),
+      title: z.string().min(1, 'Titre requis').max(200, 'Titre trop long'),
+      items: z.string().min(1, 'Articles requis'),
+      total_amount: z.number().positive('Montant total invalide')
+    }), facture);
+
+    // Sécuriser le titre
+    const titreSecurise = escapeHtml(sanitizeString(validatedData.title));
+
+    // Valider et parser les articles JSON
+    let articlesValides;
+    try {
+      articlesValides = JSON.parse(validatedData.items);
+      if (!Array.isArray(articlesValides)) {
+        throw new Error('Les articles doivent être un tableau');
+      }
+    } catch {
+      throw new Error('Format des articles invalide');
+    }
+
+    return await prisma.facture.create({
+      data: {
+        id_proprietaire: validatedData.user_id,
+        id_client: validatedData.customer_id,
+        titre: titreSecurise,
+        articles: validatedData.items,
+        montant_total: validatedData.total_amount.toString(),
+      },
+    });
+  } catch (error) {
+    console.error('Erreur dans creerFacture:', error);
+    throw error;
+  }
 };
 
-// Récupérer toutes les factures de l'utilisateur
+// Récupérer toutes les factures de l'utilisateur avec validation
 export const getFacturesUtilisateur = async (user_id: string) => {
-  return await prisma.facture.findMany({
-    where: {
-      id_proprietaire: user_id,
-    },
-    include: {
-      client: true,
-    },
-    orderBy: {
-      cree_le: 'desc',
-    },
-  });
+  try {
+    // Validation de l'ID utilisateur
+    const validatedUserId = validateAndSanitize(
+      z.string().min(1, 'ID utilisateur requis').max(255, 'ID utilisateur trop long'),
+      user_id
+    );
+
+    return await prisma.facture.findMany({
+      where: {
+        id_proprietaire: validatedUserId,
+      },
+      include: {
+        client: true,
+      },
+      orderBy: {
+        cree_le: 'desc', // Plus récentes en premier
+      },
+    });
+  } catch (error) {
+    console.error('Erreur dans getFacturesUtilisateur:', error);
+    throw new Error('Erreur lors de la récupération des factures');
+  }
 };
 
-// Récupérer une seule facture
+// Récupérer une seule facture avec validation
 export const getFactureUnique = async (id: number) => {
-  return await prisma.facture.findUnique({
-    where: {
-      id: id,
-    },
-    include: {
-      client: true,
-    },
-  });
+  try {
+    // Validation de l'ID
+    const validatedId = validateAndSanitize(
+      z.number().int().positive('ID de facture invalide'),
+      id
+    );
+
+    return await prisma.facture.findUnique({
+      where: {
+        id: validatedId,
+      },
+      include: {
+        client: true,
+      },
+    });
+  } catch (error) {
+    console.error('Erreur dans getFactureUnique:', error);
+    throw new Error('Erreur lors de la récupération de la facture');
+  }
 };
 
 // Supprimer une facture
@@ -61,7 +117,7 @@ export const supprimerFacture = async (id: number) => {
 export const modifierFacture = async (id: number, facture: {
   customer_id: number;
   title: string;
-  items: any;
+  items: string;
   total_amount: number;
 }) => {
   return await prisma.facture.update({
@@ -72,7 +128,7 @@ export const modifierFacture = async (id: number, facture: {
       id_client: facture.customer_id,
       titre: facture.title,
       articles: facture.items,
-      montant_total: facture.total_amount,
+      montant_total: facture.total_amount.toString(),
     },
   });
 };

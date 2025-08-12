@@ -5,13 +5,11 @@ import {
     Heading, 
     Hr, 
     Html, 
-    Link, 
     Preview, 
     Section, 
     Text,
     Row,
-    Column,
-    Img
+    Column
 } from "@react-email/components";
 
 interface PropsEmail {
@@ -22,7 +20,6 @@ interface PropsEmail {
     numeroCompte: string;
     devise: string;
     nomClient: string;
-    emailClient: string;
     titreFacture: string;
     dateCreation: string;
 }
@@ -35,7 +32,6 @@ export default function TemplateEmailFacture({
     numeroCompte,
     devise,
     nomClient,
-    emailClient,
     titreFacture,
     dateCreation,
 }: PropsEmail) {
@@ -82,7 +78,7 @@ export default function TemplateEmailFacture({
                     <Section style={styles.detailsSection}>
                         <Row>
                             <Column style={styles.detailColumn}>
-                                <Text style={styles.detailLabel}>Date d'émission:</Text>
+                                <Text style={styles.detailLabel}>Date d&apos;émission:</Text>
                                 <Text style={styles.detailValue}>{dateCreation}</Text>
                             </Column>
                             <Column style={styles.detailColumn}>
@@ -173,7 +169,7 @@ export default function TemplateEmailFacture({
                             Merci pour votre confiance ! 🙏
                         </Text>
                         <Text style={styles.footerText}>
-                            En cas de question, n'hésitez pas à nous contacter.
+                            En cas de question, n&apos;hésitez pas à nous contacter.
                         </Text>
                         <Text style={styles.footerSmall}>
                             Cet email a été envoyé automatiquement. Merci de ne pas répondre directement à ce message.

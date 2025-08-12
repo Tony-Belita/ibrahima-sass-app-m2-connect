@@ -155,7 +155,7 @@ export default function Historique() {
                       <IconCurrencyEuro className="h-8 w-8 text-green-600 dark:text-green-400" />
                       <div className="ml-4">
                         <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                          Chiffre d'affaires total
+                          Chiffre d&apos;affaires total
                         </p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-white">
                           {factures.reduce((total, facture) => total + parseFloat(facture.montant_total), 0).toLocaleString("fr-FR")} €
@@ -188,7 +188,7 @@ export default function Historique() {
                         Aucune facture trouvée
                       </h3>
                       <p className="text-gray-600 dark:text-gray-300">
-                        Vous n'avez pas encore créé de factures.
+                        Vous n&apos;avez pas encore créé de factures.
                       </p>
                     </div>
                   ) : (

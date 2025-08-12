@@ -12,14 +12,6 @@ global.fetch = jest.fn()
 
 // Test simple du composant Modal-Facture
 describe('Modal Facture - Tests de base', () => {
-  // Mock props basiques
-  const defaultProps = {
-    isOpen: true,
-    onClose: jest.fn(),
-    facture: null,
-    onSave: jest.fn(),
-  }
-
   beforeEach(() => {
     jest.clearAllMocks()
     ;(fetch as jest.Mock).mockResolvedValue({

@@ -13,9 +13,16 @@ import {
   IconUsers, 
   IconHistory,
   IconFileInvoice,
-  IconPlus,
-  IconTrash
+  IconPlus
 } from "@tabler/icons-react";
+
+// Types
+interface Client {
+  id: number;
+  nom: string;
+  email: string;
+  adresse: string;
+}
 
 // Composant temporaire pour le tableau des factures
 const TableauFactures = ({ listeArticles }: { listeArticles: Article[] }) => {
@@ -275,7 +282,7 @@ export default function TableauDeBord() {
                     onChange={(e) => setClient(e.target.value)}
                   >
                     <option value="">Choisir un client</option>
-                    {clients.map((clientItem: any) => (
+                    {clients.map((clientItem: Client) => (
                       <option key={clientItem.id} value={clientItem.id}>
                         {clientItem.nom} - {clientItem.email}
                       </option>
@@ -307,7 +314,7 @@ export default function TableauDeBord() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                   <div>
                     <label htmlFor="nomArticle" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Nom de l'article
+                      Nom de l&apos;article
                     </label>
                     <input
                       type="text"
@@ -368,7 +375,7 @@ export default function TableauDeBord() {
                     onClick={gererAjoutArticle}
                   >
                     <IconPlus className="h-4 w-4" />
-                    Ajouter l'article
+                    Ajouter l&apos;article
                   </button>
                 </BackgroundGradient>
               </div>
