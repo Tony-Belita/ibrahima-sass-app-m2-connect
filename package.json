@@ -21,8 +21,7 @@
     "email": "email dev --dir src/app/emails",
     "docker:build": "docker build -t saas-facturation .",
     "docker:run": "docker run -p 3000:3000 saas-facturation",
-    "docker:compose": "docker-compose up --build",
-    "prepare": "husky install"
+    "docker:compose": "docker-compose up --build"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.30.0",
