@@ -113,26 +113,42 @@ export default function TemplateEmailFacture({
                         </Row>
 
                         {/* Lignes d'articles */}
-                        {articles && articles.map((article, index) => (
-                            <Row key={index} style={styles.tableRow}>
-                                <Column style={{...styles.tableColumn, width: '45%'}}>
-                                    <Text style={styles.tableCellText}>{article.nom}</Text>
-                                </Column>
-                                <Column style={{...styles.tableColumn, width: '15%'}}>
-                                    <Text style={styles.tableCellText}>{article.quantite}</Text>
-                                </Column>
-                                <Column style={{...styles.tableColumn, width: '20%'}}>
-                                    <Text style={styles.tableCellText}>
-                                        {(article.coût || (article.prix ? article.prix / article.quantite : 0) || 0).toFixed(2)} {devise}
-                                    </Text>
-                                </Column>
-                                <Column style={{...styles.tableColumn, width: '20%'}}>
-                                    <Text style={styles.tableCellText}>
-                                        {(article.prix || (article.coût ? article.coût * article.quantite : 0) || 0).toFixed(2)} {devise}
-                                    </Text>
-                                </Column>
-                            </Row>
-                        ))}
+                        {articles && articles.map((article, index) => {
+                            // Logique de calcul standardisée
+                            let prixUnitaire = 0;
+                            let prixTotal = 0;
+                            
+                            if (article.coût) {
+                                // Format dashboard : coût = prix unitaire, prix = total
+                                prixUnitaire = article.coût;
+                                prixTotal = article.coût * article.quantite;
+                            } else if (article.prix) {
+                                // Format modal : prix = prix unitaire
+                                prixUnitaire = article.prix;
+                                prixTotal = article.prix * article.quantite;
+                            }
+                            
+                            return (
+                                <Row key={index} style={styles.tableRow}>
+                                    <Column style={{...styles.tableColumn, width: '45%'}}>
+                                        <Text style={styles.tableCellText}>{article.nom}</Text>
+                                    </Column>
+                                    <Column style={{...styles.tableColumn, width: '15%'}}>
+                                        <Text style={styles.tableCellText}>{article.quantite}</Text>
+                                    </Column>
+                                    <Column style={{...styles.tableColumn, width: '20%'}}>
+                                        <Text style={styles.tableCellText}>
+                                            {prixUnitaire.toFixed(2)} {devise}
+                                        </Text>
+                                    </Column>
+                                    <Column style={{...styles.tableColumn, width: '20%'}}>
+                                        <Text style={styles.tableCellText}>
+                                            {prixTotal.toFixed(2)} {devise}
+                                        </Text>
+                                    </Column>
+                                </Row>
+                            );
+                        })}
                     </Section>
 
                     <Hr style={styles.hr} />
