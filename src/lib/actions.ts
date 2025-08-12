@@ -48,6 +48,35 @@ export const getFactureUnique = async (id: number) => {
   });
 };
 
+// Supprimer une facture
+export const supprimerFacture = async (id: number) => {
+  return await prisma.facture.delete({
+    where: {
+      id: id,
+    },
+  });
+};
+
+// Modifier une facture
+export const modifierFacture = async (id: number, facture: {
+  customer_id: number;
+  title: string;
+  items: any;
+  total_amount: number;
+}) => {
+  return await prisma.facture.update({
+    where: {
+      id: id,
+    },
+    data: {
+      id_client: facture.customer_id,
+      titre: facture.title,
+      articles: facture.items,
+      montant_total: facture.total_amount,
+    },
+  });
+};
+
 // ===== ACTIONS POUR LES CLIENTS =====
 
 // Récupérer tous les clients de l'utilisateur
@@ -93,6 +122,24 @@ export const supprimerClient = async (id: number) => {
   return await prisma.client.delete({
     where: {
       id: id,
+    },
+  });
+};
+
+// Modifier un client
+export const modifierClient = async (id: number, client: {
+  name: string;
+  email: string;
+  address: string;
+}) => {
+  return await prisma.client.update({
+    where: {
+      id: id,
+    },
+    data: {
+      nom: client.name,
+      email: client.email,
+      adresse: client.address,
     },
   });
 };

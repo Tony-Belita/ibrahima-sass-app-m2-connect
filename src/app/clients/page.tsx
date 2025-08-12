@@ -10,11 +10,23 @@ import {
   IconSettings, 
   IconUsers, 
   IconHistory,
-  IconFileInvoice 
+  IconFileInvoice,
+  IconEdit,
+  IconTrash,
+  IconX
 } from "@tabler/icons-react";
+import Swal from 'sweetalert2';
 
 // Composant pour le tableau des clients
-const TableauClients = ({ clients }: { clients: any[] }) => {
+const TableauClients = ({ 
+  clients, 
+  onSupprimer, 
+  onModifier 
+}: { 
+  clients: any[]; 
+  onSupprimer: (id: number) => void;
+  onModifier: (client: any) => void;
+}) => {
   return (
     <div className="w-full mt-6">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -43,6 +55,9 @@ const TableauClients = ({ clients }: { clients: any[] }) => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                     Adresse
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -56,6 +71,24 @@ const TableauClients = ({ clients }: { clients: any[] }) => {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
                       {client.adresse}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => onModifier(client)}
+                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                          title="Modifier le client"
+                        >
+                          <IconEdit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => onSupprimer(client.id)}
+                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                          title="Supprimer le client"
+                        >
+                          <IconTrash className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -74,6 +107,7 @@ export default function Clients() {
   const [adresseClient, setAdresseClient] = useState<string>("");
   const [chargement, setChargement] = useState<boolean>(false);
   const [clients, setClients] = useState([]);
+  const [clientEnModification, setClientEnModification] = useState<any>(null);
 
   // Charger les clients au montage du composant
   useEffect(() => {
@@ -114,7 +148,13 @@ export default function Clients() {
       const data = await response.json();
       
       if (response.ok) {
-        console.log("Client ajouté avec succès:", data.message);
+        await Swal.fire({
+          icon: 'success',
+          title: 'Succès !',
+          text: 'Client ajouté avec succès',
+          showConfirmButton: false,
+          timer: 1500
+        });
         // Réinitialiser le formulaire
         setNomClient("");
         setEmailClient("");
@@ -122,13 +162,135 @@ export default function Clients() {
         // Recharger la liste des clients
         await chargerClients();
       } else {
-        console.error("Erreur lors de l'ajout:", data.message);
+        await Swal.fire({
+          icon: 'error',
+          title: 'Erreur !',
+          text: data.message || 'Erreur lors de l\'ajout du client',
+        });
       }
     } catch (error) {
-      console.error("Erreur réseau:", error);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Erreur !',
+        text: 'Erreur de connexion',
+      });
     } finally {
       setChargement(false);
     }
+  };
+
+  const gererModificationClient = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setChargement(true);
+    
+    try {
+      const response = await fetch('/api/clients', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: clientEnModification.id,
+          customerName: nomClient,
+          customerEmail: emailClient,
+          customerAddress: adresseClient,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        await Swal.fire({
+          icon: 'success',
+          title: 'Succès !',
+          text: 'Client modifié avec succès',
+          showConfirmButton: false,
+          timer: 1500
+        });
+        // Réinitialiser le formulaire
+        setNomClient("");
+        setEmailClient("");
+        setAdresseClient("");
+        setClientEnModification(null);
+        // Recharger la liste des clients
+        await chargerClients();
+      } else {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Erreur !',
+          text: data.message || 'Erreur lors de la modification du client',
+        });
+      }
+    } catch (error) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Erreur !',
+        text: 'Erreur de connexion',
+      });
+    } finally {
+      setChargement(false);
+    }
+  };
+
+  const gererSuppressionClient = async (id: number) => {
+    const result = await Swal.fire({
+      title: 'Êtes-vous sûr ?',
+      text: "Cette action ne peut pas être annulée !",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Oui, supprimer !',
+      cancelButtonText: 'Annuler'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`/api/clients?id=${id}`, {
+          method: 'DELETE',
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          await Swal.fire({
+            icon: 'success',
+            title: 'Supprimé !',
+            text: 'Le client a été supprimé avec succès',
+            showConfirmButton: false,
+            timer: 1500
+          });
+          // Recharger la liste des clients
+          await chargerClients();
+        } else {
+          await Swal.fire({
+            icon: 'error',
+            title: 'Erreur !',
+            text: data.message || 'Erreur lors de la suppression du client',
+          });
+        }
+      } catch (error) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Erreur !',
+          text: 'Erreur de connexion',
+        });
+      }
+    }
+  };
+
+  const commencerModification = (client: any) => {
+    setClientEnModification(client);
+    setNomClient(client.nom);
+    setEmailClient(client.email);
+    setAdresseClient(client.adresse);
+  };
+
+  const annulerModification = () => {
+    setClientEnModification(null);
+    setNomClient("");
+    setEmailClient("");
+    setAdresseClient("");
   };
 
   // Configuration des liens de navigation
@@ -185,8 +347,25 @@ export default function Clients() {
             Créez et consultez tous vos clients
           </p>
 
-          {/* Formulaire d'ajout de client */}
-          <form className="w-full" onSubmit={gererAjoutClient} method="POST">
+          {/* Formulaire d'ajout/modification de client */}
+          <form className="w-full" onSubmit={clientEnModification ? gererModificationClient : gererAjoutClient} method="POST">
+            {clientEnModification && (
+              <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium text-blue-900 dark:text-blue-100">
+                    Modification du client: {clientEnModification.nom}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={annulerModification}
+                    className="text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100"
+                  >
+                    <IconX className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            )}
+            
             <div className="w-full flex flex-col md:flex-row items-center md:space-x-4 space-y-4 md:space-y-0 mb-4">
               <section className="w-full md:w-1/2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -233,21 +412,40 @@ export default function Clients() {
               />
             </div>
 
-            {/* Bouton avec style Border Magic */}
-            <button 
-              type="submit"
-              className="relative inline-flex h-12 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 mb-6"
-              disabled={chargement}
-            >
-              <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-              <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-6 py-1 text-sm font-medium text-white backdrop-blur-3xl">
-                {chargement ? "Ajout en cours..." : "Ajouter le client"}
-              </span>
-            </button>
+            {/* Boutons avec style Border Magic */}
+            <div className="flex space-x-4 mb-6">
+              <button 
+                type="submit"
+                className="relative inline-flex h-12 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
+                disabled={chargement}
+              >
+                <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
+                <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-6 py-1 text-sm font-medium text-white backdrop-blur-3xl">
+                  {chargement ? 
+                    (clientEnModification ? "Modification en cours..." : "Ajout en cours...") : 
+                    (clientEnModification ? "Modifier le client" : "Ajouter le client")
+                  }
+                </span>
+              </button>
+              
+              {clientEnModification && (
+                <button 
+                  type="button"
+                  onClick={annulerModification}
+                  className="px-6 py-3 bg-gray-500 text-white rounded-full hover:bg-gray-600 transition-colors"
+                >
+                  Annuler
+                </button>
+              )}
+            </div>
           </form>
 
           {/* Tableau des clients */}
-          <TableauClients clients={clients} />
+          <TableauClients 
+            clients={clients} 
+            onSupprimer={gererSuppressionClient}
+            onModifier={commencerModification}
+          />
         </div>
       </main>
     </div>

@@ -13,10 +13,14 @@ import {
   IconFileInvoice,
   IconEye,
   IconDownload,
-  IconMail
+  IconMail,
+  IconEdit,
+  IconTrash
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { motion } from "motion/react";
+import Swal from 'sweetalert2';
+import { ModalFacture } from "@/components/ui/modal-facture";
 
 // Interface pour les factures
 interface Facture {
@@ -46,7 +50,15 @@ const formaterDate = (dateString: string) => {
 };
 
 // Composant pour le tableau des factures
-const TableauFactures = ({ factures }: { factures: Facture[] }) => {
+const TableauFactures = ({ 
+  factures, 
+  onSupprimer, 
+  onModifier 
+}: { 
+  factures: Facture[];
+  onSupprimer: (id: number) => void;
+  onModifier: (facture: Facture) => void;
+}) => {
   if (factures.length === 0) {
     return (
       <div className="w-full mt-6">
@@ -137,6 +149,20 @@ const TableauFactures = ({ factures }: { factures: Facture[] }) => {
                       >
                         <IconEye className="h-4 w-4" />
                       </Link>
+                      <button
+                        onClick={() => onModifier(facture)}
+                        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 transition-colors"
+                        title="Modifier la facture"
+                      >
+                        <IconEdit className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => onSupprimer(facture.id)}
+                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                        title="Supprimer la facture"
+                      >
+                        <IconTrash className="h-4 w-4" />
+                      </button>
                     </div>
                   </td>
                 </motion.tr>
@@ -153,6 +179,8 @@ export default function PageFactures() {
   const [factures, setFactures] = useState<Facture[]>([]);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState("");
+  const [modalOuvert, setModalOuvert] = useState(false);
+  const [factureEnModification, setFactureEnModification] = useState<Facture | null>(null);
 
   // Configuration des liens de navigation
   const liens = [
@@ -205,6 +233,81 @@ export default function PageFactures() {
 
     recupererFactures();
   }, []);
+
+  const gererSuppressionFacture = async (id: number) => {
+    const result = await Swal.fire({
+      title: 'Êtes-vous sûr ?',
+      text: "Cette action ne peut pas être annulée !",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Oui, supprimer !',
+      cancelButtonText: 'Annuler'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`/api/facture?id=${id}`, {
+          method: 'DELETE',
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          await Swal.fire({
+            icon: 'success',
+            title: 'Supprimée !',
+            text: 'La facture a été supprimée avec succès',
+            showConfirmButton: false,
+            timer: 1500
+          });
+          // Recharger la liste des factures
+          setFactures(factures.filter(facture => facture.id !== id));
+        } else {
+          await Swal.fire({
+            icon: 'error',
+            title: 'Erreur !',
+            text: data.message || 'Erreur lors de la suppression de la facture',
+          });
+        }
+      } catch (error) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Erreur !',
+          text: 'Erreur de connexion',
+        });
+      }
+    }
+  };
+
+  const gererModificationFacture = async (facture: Facture) => {
+    setFactureEnModification(facture);
+    setModalOuvert(true);
+  };
+
+  const handleSaveFacture = (factureModifiee: any) => {
+    // Recharger les factures après modification
+    const recupererFactures = async () => {
+      try {
+        const response = await fetch('/api/facture?userID=user_123');
+        const data = await response.json();
+        
+        if (response.ok) {
+          setFactures(data.factures || []);
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération des factures:", error);
+      }
+    };
+
+    recupererFactures();
+  };
+
+  const fermerModal = () => {
+    setModalOuvert(false);
+    setFactureEnModification(null);
+  };
 
   if (chargement) {
     return (
@@ -265,10 +368,22 @@ export default function PageFactures() {
               </div>
             )}
 
-            <TableauFactures factures={factures} />
+            <TableauFactures 
+              factures={factures} 
+              onSupprimer={gererSuppressionFacture}
+              onModifier={gererModificationFacture}
+            />
           </motion.div>
         </div>
       </main>
+
+      {/* Modal de modification */}
+      <ModalFacture
+        isOpen={modalOuvert}
+        onClose={fermerModal}
+        facture={factureEnModification}
+        onSave={handleSaveFacture}
+      />
     </div>
   );
 }

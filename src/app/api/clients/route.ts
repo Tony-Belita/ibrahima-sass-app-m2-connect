@@ -1,4 +1,4 @@
-import { supprimerClient, ajouterClient, getClients } from "@/lib/actions";
+import { supprimerClient, ajouterClient, getClients, modifierClient } from "@/lib/actions";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -46,6 +46,28 @@ export async function DELETE(req: NextRequest) {
 		await supprimerClient(Number(clientID));
 		return NextResponse.json({ message: "Client supprimé !" }, { status: 200 });
 	} catch (err) {
+		return NextResponse.json(
+			{ message: "Une erreur s'est produite", err },
+			{ status: 400 }
+		);
+	}
+}
+
+export async function PUT(req: NextRequest) {
+	const { id, customerName, customerEmail, customerAddress } = await req.json();
+
+	try {
+		const clientModifie = await modifierClient(id, {
+			name: customerName,
+			email: customerEmail,
+			address: customerAddress,
+		});
+		return NextResponse.json(
+			{ message: "Client modifié avec succès !", client: clientModifie },
+			{ status: 200 }
+		);
+	} catch (err) {
+		console.error("Erreur lors de la modification du client:", err);
 		return NextResponse.json(
 			{ message: "Une erreur s'est produite", err },
 			{ status: 400 }
