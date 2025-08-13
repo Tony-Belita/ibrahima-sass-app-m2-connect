@@ -1,5 +1,6 @@
 "use client";
 import { ChangeEvent, useEffect, useState, useCallback } from "react";
+import { useUser } from "@clerk/nextjs";
 import { 
   Sidebar, 
   SidebarBody, 
@@ -14,6 +15,7 @@ import {
 } from "@tabler/icons-react";
 
 export default function Parametres() {
+    const { user } = useUser();
     // État par défaut des informations bancaires
     const [infoBancaire, setInfoBancaire] = useState({
         nom_compte: "",
@@ -32,8 +34,10 @@ export default function Parametres() {
 
     // Fonction pour récupérer les informations bancaires
     const recupererInfosBancaires = useCallback(async () => {
+        if (!user?.id) return;
+        
         try {
-            const response = await fetch('/api/bank-info?userID=user_123');
+            const response = await fetch(`/api/bank-info?userID=${user.id}`);
             const data = await response.json();
             
             if (response.ok && data.infosBancaires) {
@@ -47,12 +51,14 @@ export default function Parametres() {
         } catch (error) {
             console.error("Erreur lors de la récupération des infos bancaires:", error);
         }
-    }, []);
+    }, [user?.id]);
 
     // Récupérer les informations bancaires au chargement de la page
     useEffect(() => {
-        recupererInfosBancaires();
-    }, [recupererInfosBancaires]);
+        if (user?.id) {
+            recupererInfosBancaires();
+        }
+    }, [user?.id, recupererInfosBancaires]);
 
     // Met à jour l'état du formulaire
     const gererMiseAJourInfoBancaire = (
@@ -68,7 +74,11 @@ export default function Parametres() {
     // Gère la soumission du formulaire
     const gererSoumission = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log("Tentative de mise à jour des informations bancaires...");
+        
+        if (!user?.id) {
+            console.error("Utilisateur non authentifié");
+            return;
+        }
         
         try {
             const response = await fetch('/api/bank-info', {
@@ -77,7 +87,7 @@ export default function Parametres() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    userID: 'user_123', // Remplacez par l'ID utilisateur réel
+                    userID: user.id,
                     accountName: saisieInfoBancaire.nomCompte,
                     accountNumber: saisieInfoBancaire.numeroCompte,
                     bankName: saisieInfoBancaire.nomBanque,
@@ -88,7 +98,6 @@ export default function Parametres() {
             const data = await response.json();
             
             if (response.ok) {
-                console.log("Informations bancaires mises à jour:", data.message);
                 // Mettre à jour l'affichage avec les nouvelles informations
                 setInfoBancaire({
                     nom_compte: saisieInfoBancaire.nomCompte,

@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useUser } from "@clerk/nextjs";
 import { 
   Sidebar, 
   SidebarBody, 
@@ -174,6 +175,7 @@ const TableauFactures = ({
 };
 
 export default function PageFactures() {
+  const { user } = useUser();
   const [factures, setFactures] = useState<Facture[]>([]);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState("");
@@ -209,28 +211,32 @@ export default function PageFactures() {
     },
   ];
 
+  const recupererFactures = useCallback(async () => {
+    if (!user?.id) return;
+    
+    try {
+      const response = await fetch(`/api/facture?userID=${user.id}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setFactures(data.factures || []);
+      } else {
+        setErreur(data.message || "Erreur lors de la récupération des factures");
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération des factures:", error);
+      setErreur("Erreur de connexion");
+    } finally {
+      setChargement(false);
+    }
+  }, [user?.id]);
+
   // Récupération des factures au chargement
   useEffect(() => {
-    const recupererFactures = async () => {
-      try {
-        const response = await fetch('/api/facture?userID=user_123');
-        const data = await response.json();
-        
-        if (response.ok) {
-          setFactures(data.factures || []);
-        } else {
-          setErreur(data.message || "Erreur lors de la récupération des factures");
-        }
-      } catch (error) {
-        console.error("Erreur lors de la récupération des factures:", error);
-        setErreur("Erreur de connexion");
-      } finally {
-        setChargement(false);
-      }
-    };
-
-    recupererFactures();
-  }, []);
+    if (user?.id) {
+      recupererFactures();
+    }
+  }, [user?.id, recupererFactures]);
 
   const gererSuppressionFacture = async (id: number) => {
     const result = await Swal.fire({
@@ -286,19 +292,6 @@ export default function PageFactures() {
 
   const handleSaveFacture = () => {
     // Recharger les factures après modification
-    const recupererFactures = async () => {
-      try {
-        const response = await fetch('/api/facture?userID=user_123');
-        const data = await response.json();
-        
-        if (response.ok) {
-          setFactures(data.factures || []);
-        }
-      } catch (error) {
-        console.error("Erreur lors de la récupération des factures:", error);
-      }
-    };
-
     recupererFactures();
   };
 

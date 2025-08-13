@@ -1,6 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { IconX, IconPlus, IconTrash } from "@tabler/icons-react";
+import { useUser } from "@clerk/nextjs";
 import Swal from 'sweetalert2';
 
 interface Article {
@@ -37,11 +38,26 @@ interface ModalFactureProps {
 }
 
 export const ModalFacture = ({ isOpen, onClose, facture, onSave }: ModalFactureProps) => {
+  const { user } = useUser();
   const [titre, setTitre] = useState("");
   const [clientSelectionne, setClientSelectionne] = useState<number>(0);
   const [articles, setArticles] = useState<Article[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [chargement, setChargement] = useState(false);
+
+  const chargerClients = useCallback(async () => {
+    if (!user?.id) return;
+    
+    try {
+      const response = await fetch(`/api/clients?userID=${user.id}`);
+      const data = await response.json();
+      if (response.ok) {
+        setClients(data.clients);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des clients:', error);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     if (isOpen) {
@@ -57,19 +73,7 @@ export const ModalFacture = ({ isOpen, onClose, facture, onSave }: ModalFactureP
         }
       }
     }
-  }, [isOpen, facture]);
-
-  const chargerClients = async () => {
-    try {
-      const response = await fetch('/api/clients?userID=user_123');
-      const data = await response.json();
-      if (response.ok) {
-        setClients(data.clients);
-      }
-    } catch (error) {
-      console.error('Erreur lors du chargement des clients:', error);
-    }
-  };
+  }, [isOpen, facture, chargerClients]);
 
   const ajouterArticle = () => {
     setArticles([...articles, { 

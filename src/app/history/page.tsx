@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { 
   Sidebar, 
@@ -18,14 +19,17 @@ import {
 } from "@tabler/icons-react";
 
 export default function Historique() {
+  const { user } = useUser();
   const [factures, setFactures] = useState<Facture[]>([]);
   const [chargement, setChargement] = useState<boolean>(true);
   const [erreur, setErreur] = useState<string>("");
 
   // Récupération des vraies factures depuis la base de données
   const recupererFactures = useCallback(async () => {
+    if (!user?.id) return;
+    
     try {
-      const response = await fetch('/api/facture?userID=user_123');
+      const response = await fetch(`/api/facture?userID=${user.id}`);
       const data = await response.json();
       
       if (response.ok) {
@@ -39,11 +43,13 @@ export default function Historique() {
     } finally {
       setChargement(false);
     }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
-    recupererFactures();
-  }, [recupererFactures]);
+    if (user?.id) {
+      recupererFactures();
+    }
+  }, [user?.id, recupererFactures]);
 
   // Fonction pour formater la date en français
   const formaterDate = (dateString: string) => {

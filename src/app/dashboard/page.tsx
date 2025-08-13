@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import { 
   Sidebar, 
   SidebarBody, 
@@ -112,6 +113,7 @@ const TableauFactures = ({ listeArticles }: { listeArticles: Article[] }) => {
 };
 
 export default function TableauDeBord() {
+  const { user } = useUser();
   const [listeArticles, setListeArticles] = useState<Article[]>([]);
   const [client, setClient] = useState<string>("");
   const [titreFacture, setTitreFacture] = useState<string>("");
@@ -123,8 +125,10 @@ export default function TableauDeBord() {
 
   // Fonction pour récupérer la liste des clients
   const recupererClients = useCallback(async () => {
+    if (!user?.id) return;
+    
     try {
-      const response = await fetch('/api/clients?userID=user_123');
+      const response = await fetch(`/api/clients?userID=${user.id}`);
       const data = await response.json();
       
       if (response.ok) {
@@ -135,7 +139,7 @@ export default function TableauDeBord() {
     } catch (error) {
       console.error("Erreur réseau lors de la récupération des clients:", error);
     }
-  }, []);
+  }, [user?.id]);
 
   // Récupérer les clients au chargement de la page
   useEffect(() => {
@@ -177,6 +181,11 @@ export default function TableauDeBord() {
   const gererSoumissionFormulaire = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
+    if (!user?.id) {
+      alert("Utilisateur non connecté");
+      return;
+    }
+    
     if (listeArticles.length === 0) {
       alert("Veuillez ajouter au moins un article à la facture");
       return;
@@ -188,14 +197,12 @@ export default function TableauDeBord() {
     }
 
     try {
-      console.log("Création de la facture...");
-      
       const factureData = {
         customer: parseInt(client), // ID du client sélectionné
         title: titreFacture,
         items: listeArticles,
         total: obtenirMontantTotal(),
-        ownerID: 'user_123' // Remplacez par l'ID utilisateur réel
+        ownerID: user.id
       };
 
       const response = await fetch('/api/facture', {
@@ -209,8 +216,6 @@ export default function TableauDeBord() {
       const data = await response.json();
       
       if (response.ok) {
-        console.log("Facture créée avec succès:", data);
-        
         // Rediriger vers la page de prévisualisation de la facture
         if (data.facture && data.facture.id) {
           router.push(`/facture/${data.facture.id}`);

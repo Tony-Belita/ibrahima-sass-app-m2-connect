@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useUser } from "@clerk/nextjs";
 import { 
   Sidebar, 
   SidebarBody, 
@@ -111,6 +112,7 @@ const TableauClients = ({
 };
 
 export default function Clients() {
+  const { user } = useUser();
   const [nomClient, setNomClient] = useState<string>("");
   const [emailClient, setEmailClient] = useState<string>("");
   const [adresseClient, setAdresseClient] = useState<string>("");
@@ -118,15 +120,11 @@ export default function Clients() {
   const [clients, setClients] = useState<Client[]>([]);
   const [clientEnModification, setClientEnModification] = useState<Client | null>(null);
 
-  // Charger les clients au montage du composant
-  useEffect(() => {
-    chargerClients();
-  }, []);
-
-  const chargerClients = async () => {
+  const chargerClients = useCallback(async () => {
+    if (!user?.id) return;
+    
     try {
-      // Remplacez "user_123" par l'ID utilisateur réel (à récupérer depuis Clerk)
-      const response = await fetch('/api/clients?userID=user_123');
+      const response = await fetch(`/api/clients?userID=${user.id}`);
       const data = await response.json();
       if (response.ok) {
         setClients(data.clients);
@@ -134,10 +132,27 @@ export default function Clients() {
     } catch {
       console.error('Erreur lors du chargement des clients');
     }
-  };
+  }, [user?.id]);
+
+  // Charger les clients au montage du composant
+  useEffect(() => {
+    if (user?.id) {
+      chargerClients();
+    }
+  }, [user?.id, chargerClients]);
 
   const gererAjoutClient = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    if (!user?.id) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Erreur',
+        text: 'Utilisateur non authentifié',
+      });
+      return;
+    }
+    
     setChargement(true);
     
     try {
@@ -147,7 +162,7 @@ export default function Clients() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userID: 'user_123', // Remplacez par l'ID utilisateur réel
+          userID: user.id,
           customerName: nomClient,
           customerEmail: emailClient,
           customerAddress: adresseClient,
@@ -190,7 +205,7 @@ export default function Clients() {
 
   const gererModificationClient = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!clientEnModification) return;
+    if (!clientEnModification || !user?.id) return;
     
     setChargement(true);
     
@@ -202,6 +217,7 @@ export default function Clients() {
         },
         body: JSON.stringify({
           id: clientEnModification.id,
+          userID: user.id,
           customerName: nomClient,
           customerEmail: emailClient,
           customerAddress: adresseClient,
@@ -244,6 +260,8 @@ export default function Clients() {
   };
 
   const gererSuppressionClient = async (id: number) => {
+    if (!user?.id) return;
+    
     const result = await Swal.fire({
       title: 'Êtes-vous sûr ?',
       text: "Cette action ne peut pas être annulée !",
@@ -257,7 +275,7 @@ export default function Clients() {
 
     if (result.isConfirmed) {
       try {
-        const response = await fetch(`/api/clients?id=${id}`, {
+        const response = await fetch(`/api/clients?id=${id}&userID=${user.id}`, {
           method: 'DELETE',
         });
 

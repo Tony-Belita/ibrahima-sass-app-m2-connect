@@ -4,8 +4,6 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
     const { accountName, userID, accountNumber, bankName, currency } = await req.json();
     
-    console.log("Données reçues:", { accountName, userID, accountNumber, bankName, currency });
-    
     // Validation des données
     if (!userID || !accountName || !accountNumber || !bankName || !currency) {
         return NextResponse.json(
@@ -15,7 +13,6 @@ export async function POST(req: NextRequest) {
     }
     
     try {
-        console.log("Appel de la fonction mettreAJourInfosBancaires...");
         await mettreAJourInfosBancaires({
             user_id: userID,
             bank_name: bankName,
@@ -23,7 +20,6 @@ export async function POST(req: NextRequest) {
             account_name: accountName,
             currency: currency,
         });
-        console.log("Informations bancaires mises à jour avec succès");
         return NextResponse.json({ message: "Informations bancaires mises à jour !" }, { status: 201 });
     } catch (err) {
         console.error("Erreur dans la route bank-info:", err);
