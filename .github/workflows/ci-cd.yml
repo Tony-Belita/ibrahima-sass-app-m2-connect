@@ -46,6 +46,11 @@ jobs:
       run: npm run build
       env:
         NODE_ENV: production
+        CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+        NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
 
     - name: Upload coverage to Codecov
       if: matrix.node-version == '18.x'

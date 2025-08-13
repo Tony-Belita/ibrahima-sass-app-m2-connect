@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
-
 export async function POST(req: NextRequest) {
     try {
+        // Initialiser Resend à l'intérieur de la fonction pour éviter les erreurs de build
+        const resend = new Resend(process.env.RESEND_API_KEY!);
+        
         const body = await req.json();
         console.log("📧 Données reçues dans l'API:", body);
         
@@ -21,6 +22,15 @@ export async function POST(req: NextRequest) {
             dateCreation,
         } = body;
 
+        // Vérifier que la clé API Resend est disponible
+        if (!process.env.RESEND_API_KEY) {
+            console.error("❌ Clé API Resend non définie");
+            return NextResponse.json(
+                { message: "Configuration email manquante" },
+                { status: 500 }
+            );
+        }
+
         // Vérifier que toutes les données nécessaires sont présentes
         if (!factureID || !emailClient || !nomClient || !titreFacture) {
             console.error(" Données manquantes:", {
@@ -34,9 +44,6 @@ export async function POST(req: NextRequest) {
                 { status: 400 }
             );
         }
-
-        console.log(" Toutes les données nécessaires sont présentes");
-        console.log(" Clé API Resend:", process.env.RESEND_API_KEY ? "Définie" : "Non définie");
 
         // template HTML simple au lieu d'utiliser React Email qui pose problème
         const htmlContent = `
