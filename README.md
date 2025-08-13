@@ -182,4 +182,4 @@ L'application implémente les meilleures pratiques de sécurité :
 
 ---
 
-⭐ **Si ce projet vous a aidé, n'hésitez pas à lui donner une étoile !**
+⭐ **Si ce projet vous a plu, n'hésitez pas à lui donner une étoile !**
