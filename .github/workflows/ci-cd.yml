@@ -46,11 +46,19 @@ jobs:
       run: npm run build
       env:
         NODE_ENV: production
-        CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
-        NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
-        RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-        NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
+        # Secrets Clerk (requis)
+        CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY || 'sk_test_dummy_key_for_ci' }}
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_dummy_key_for_ci' }}
+        # Database
+        NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL || 'postgresql://dummy:dummy@localhost:5432/dummy' }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://dummy:dummy@localhost:5432/dummy' }}
+        # Email
+        RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || 're_dummy_key' }}
+        # App config
+        NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000' }}
+        # Security
+        NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'dummy-secret-for-ci-testing-only' }}
+        CSRF_SECRET: ${{ secrets.CSRF_SECRET || 'dummy-csrf-secret-for-ci-testing' }}
 
     - name: Upload coverage to Codecov
       if: matrix.node-version == '18.x'
