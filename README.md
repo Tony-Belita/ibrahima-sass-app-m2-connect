@@ -121,6 +121,22 @@ npm run build
 npm start
 ```
 
+### 🚨 COMMANDES RAPIDES
+# Build local pour tester
+npm run build
+
+# Tests avant déploiement
+npm test
+
+# Vérifier le linting
+npm run lint
+
+# Vérifier les types
+npm run type-check
+
+# Push vers production
+git add . && git commit -m "deploy: update production" && git push origin main
+
 ## 📊 **Structure du Projet**
 
 ```
