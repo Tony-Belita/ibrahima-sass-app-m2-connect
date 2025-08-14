@@ -109,6 +109,32 @@ export async function POST(req: NextRequest) {
                     </tbody>
                 </table>
 
+                <div class="info-section" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0ea5e9;">
+                    <h3 style="color: #333; margin-bottom: 15px;">💳 Informations de paiement</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div>
+                            <p style="margin: 5px 0; color: #666; font-size: 12px; text-transform: uppercase;">Nom du compte :</p>
+                            <p style="margin: 5px 0; color: #333; font-weight: bold;">${nomEmetteur}</p>
+                        </div>
+                        <div>
+                            <p style="margin: 5px 0; color: #666; font-size: 12px; text-transform: uppercase;">Numéro de compte :</p>
+                            <p style="margin: 5px 0; color: #333; font-weight: bold; font-family: monospace;">${numeroCompte}</p>
+                        </div>
+                        <div>
+                            <p style="margin: 5px 0; color: #666; font-size: 12px; text-transform: uppercase;">Devise :</p>
+                            <p style="margin: 5px 0; color: #333; font-weight: bold;">${devise}</p>
+                        </div>
+                    </div>
+                    <div style="background-color: #e3f2fd; padding: 15px; border-radius: 6px; margin-top: 15px; border-left: 3px solid #2196f3;">
+                        <p style="margin: 0; color: #1565c0; font-weight: bold; font-size: 14px;">
+                            🏷️ Référence de paiement : FACT-${factureID}
+                        </p>
+                        <p style="margin: 5px 0 0 0; color: #1976d2; font-size: 12px;">
+                            Veuillez mentionner cette référence lors de votre virement bancaire.
+                        </p>
+                    </div>
+                </div>
+
                 <div class="footer">
                     <p>Merci pour votre confiance !</p>
                     <p>Cette facture a été générée automatiquement.</p>

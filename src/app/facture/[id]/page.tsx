@@ -105,6 +105,41 @@ const ComposantAImprimer = forwardRef<HTMLDivElement, PropsImpression>((props, r
         </div>
 
         <TableauFacture listeArticles={facture?.articles ? JSON.parse(facture.articles) : []} />
+        
+        {/* Section des informations bancaires pour le paiement */}
+        {infoBancaire && (
+          <div className="mt-8 border-t pt-6">
+            <h3 className="text-lg font-semibold mb-4">💳 Informations de paiement</h3>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm opacity-60">Nom du compte :</p>
+                  <p className="font-medium">{infoBancaire.nom_compte}</p>
+                </div>
+                <div>
+                  <p className="text-sm opacity-60">Banque :</p>
+                  <p className="font-medium">{infoBancaire.nom_banque}</p>
+                </div>
+                <div>
+                  <p className="text-sm opacity-60">Numéro de compte :</p>
+                  <p className="font-medium font-mono">{infoBancaire.numero_compte}</p>
+                </div>
+                <div>
+                  <p className="text-sm opacity-60">Devise :</p>
+                  <p className="font-medium">{infoBancaire.devise}</p>
+                </div>
+              </div>
+              <div className="mt-4 p-3 bg-blue-50 rounded border-l-4 border-blue-400">
+                <p className="text-sm text-blue-800">
+                  <strong>Référence de paiement :</strong> FACT-{id}
+                </p>
+                <p className="text-xs text-blue-600 mt-1">
+                  Veuillez mentionner cette référence lors de votre virement.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

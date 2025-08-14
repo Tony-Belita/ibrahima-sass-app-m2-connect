@@ -14,7 +14,8 @@ import {
   IconUsers, 
   IconHistory,
   IconFileInvoice,
-  IconPlus
+  IconPlus,
+  IconLoader2
 } from "@tabler/icons-react";
 
 // Types
@@ -121,6 +122,7 @@ export default function TableauDeBord() {
   const [quantiteArticle, setQuantiteArticle] = useState<string>("1");
   const [nomArticle, setNomArticle] = useState<string>("");
   const [clients, setClients] = useState([]);
+  const [chargementCreation, setChargementCreation] = useState<boolean>(false);
   const router = useRouter();
 
   // Fonction pour récupérer la liste des clients
@@ -145,6 +147,19 @@ export default function TableauDeBord() {
   useEffect(() => {
     recupererClients();
   }, [recupererClients]);
+
+  // Nettoyer l'état de chargement si l'utilisateur quitte la page
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      setChargementCreation(false);
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   // Fonction pour ajouter un article à la liste
   const gererAjoutArticle = (e: React.FormEvent) => {
@@ -181,6 +196,11 @@ export default function TableauDeBord() {
   const gererSoumissionFormulaire = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
+    // Éviter les soumissions multiples
+    if (chargementCreation) {
+      return;
+    }
+    
     if (!user?.id) {
       alert("Utilisateur non connecté");
       return;
@@ -196,6 +216,9 @@ export default function TableauDeBord() {
       return;
     }
 
+    // Activer l'état de chargement
+    setChargementCreation(true);
+
     try {
       const factureData = {
         customer: parseInt(client), // ID du client sélectionné
@@ -204,6 +227,8 @@ export default function TableauDeBord() {
         total: obtenirMontantTotal(),
         ownerID: user.id
       };
+
+      console.log("🚀 Création de la facture en cours...", factureData);
 
       const response = await fetch('/api/facture', {
         method: 'POST',
@@ -216,8 +241,11 @@ export default function TableauDeBord() {
       const data = await response.json();
       
       if (response.ok) {
+        console.log("✅ Facture créée avec succès:", data.facture);
+        
         // Rediriger vers la page de prévisualisation de la facture
         if (data.facture && data.facture.id) {
+          console.log("🔄 Redirection vers la facture:", data.facture.id);
           router.push(`/facture/${data.facture.id}`);
         } else {
           alert("Facture créée avec succès !");
@@ -225,14 +253,17 @@ export default function TableauDeBord() {
           setListeArticles([]);
           setClient("");
           setTitreFacture("");
+          setChargementCreation(false);
         }
       } else {
-        console.error("Erreur lors de la création:", data.message);
+        console.error("❌ Erreur lors de la création:", data.message);
         alert("Erreur lors de la création de la facture: " + data.message);
+        setChargementCreation(false);
       }
     } catch (error) {
-      console.error("Erreur réseau:", error);
+      console.error("🔥 Erreur réseau:", error);
       alert("Erreur de connexion lors de la création de la facture");
+      setChargementCreation(false);
     }
   };
 
@@ -391,8 +422,13 @@ export default function TableauDeBord() {
                 <BackgroundGradient className="rounded-lg w-fit">
                   <button
                     type="button"
-                    className="bg-white dark:bg-gray-900 text-black dark:text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 hover:scale-105 transition-transform duration-200"
+                    className={`px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-transform duration-200 ${
+                      chargementCreation 
+                        ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed' 
+                        : 'bg-white dark:bg-gray-900 text-black dark:text-white hover:scale-105'
+                    }`}
                     onClick={gererAjoutArticle}
+                    disabled={chargementCreation}
                   >
                     <IconPlus className="h-4 w-4" />
                     Ajouter l&apos;article
@@ -406,10 +442,22 @@ export default function TableauDeBord() {
               {/* Bouton de sauvegarde avec BackgroundGradient */}
               <BackgroundGradient className="rounded-xl w-full">
                 <button
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white w-full p-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg"
+                  className={`w-full p-4 rounded-xl font-bold text-lg transition-all duration-200 shadow-lg flex items-center justify-center gap-3 ${
+                    chargementCreation 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700'
+                  }`}
                   type="submit"
+                  disabled={chargementCreation}
                 >
-                  SAUVEGARDER ET PRÉVISUALISER LA FACTURE
+                  {chargementCreation ? (
+                    <>
+                      <IconLoader2 className="h-5 w-5 animate-spin" />
+                      CRÉATION EN COURS...
+                    </>
+                  ) : (
+                    'SAUVEGARDER ET PRÉVISUALISER LA FACTURE'
+                  )}
                 </button>
               </BackgroundGradient>
             </form>
