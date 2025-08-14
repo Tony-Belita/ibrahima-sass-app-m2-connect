@@ -122,19 +122,19 @@ npm start
 ```
 
 ### 🚨 COMMANDES RAPIDES
-# Build local pour tester
+#### Build local pour tester
 npm run build
 
-# Tests avant déploiement
+#### Tests avant déploiement
 npm test
 
-# Vérifier le linting
+#### Vérifier le linting
 npm run lint
 
-# Vérifier les types
+#### Vérifier les types
 npm run type-check
 
-# Push vers production
+#### Push vers production
 git add . && git commit -m "deploy: update production" && git push origin main
 
 ## 📊 **Structure du Projet**
