@@ -78,8 +78,6 @@ npm install
 Créez un fichier `.env.local` à la racine du projet :
 
 ```env
-# Base de données
-DATABASE_URL="postgresql://username:password@host:port/database"
 
 # Clerk Authentication
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxxx
