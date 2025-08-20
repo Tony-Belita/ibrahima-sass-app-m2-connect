@@ -231,7 +231,7 @@ Les déploiements sont automatiques :
 
 - 💬 **Discussions** : [GitHub Discussions](https://github.com/Tony-Belita/ibrahima-sass-app-m2-connect/discussions)
 - 🐛 **Issues** : [GitHub Issues](https://github.com/Tony-Belita/ibrahima-sass-app-m2-connect/issues)
-- 📧 **Email** : contribute@votre-domaine.com
+- 📧 **Email** : barryibrahimatalibe@gmail.com
 
 ## 🏆 Reconnaissance
 
