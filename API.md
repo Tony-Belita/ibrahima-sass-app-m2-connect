@@ -437,13 +437,7 @@ describe('API Clients', () => {
 | Factures par mois | 5000 |
 | Taille fichier upload | 10MB |
 
-## 🆘 Support et Contact
-
-Pour toute question sur l'API :
-- 📧 Email : api-support@votre-domaine.com
-- 📚 Documentation : https://votre-domaine.com/docs
-- 🐛 Issues : https://github.com/votre-username/repository/issues
 
 ---
 
-✨ **API Documentation v1.0 - Mise à jour : Janvier 2024**
+✨ **API Documentation v1.0 - Mise à jour : Août 2025**

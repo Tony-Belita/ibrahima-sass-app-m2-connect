@@ -15,7 +15,8 @@ import {
   IconFileInvoice,
   IconEye,
   IconCalendar,
-  IconCurrencyEuro
+  IconCurrencyEuro,
+  IconQuestionMark
 } from "@tabler/icons-react";
 
 export default function Historique() {
@@ -90,6 +91,11 @@ export default function Historique() {
       label: "Factures",
       href: "/facture",
       icon: <IconFileInvoice className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
+    },
+    {
+      label: "Comment ça marche",
+      href: "/how-it-works",
+      icon: <IconQuestionMark className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
     },
     {
       label: "Paramètres",
