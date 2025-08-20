@@ -15,7 +15,6 @@ Une application SaaS moderne et sécurisée pour la gestion de factures, dévelo
 - ✅ Base de données clients complète
 - ✅ Informations de contact et facturation
 - ✅ Historique des interactions
-- ✅ Recherche et filtrage avancés
 
 ### 🏦 **Informations Bancaires**
 - ✅ Configuration des comptes bancaires
@@ -120,6 +119,8 @@ npm run dev
 # Build de production
 npm run build
 npm start
+
+Important : Configurer en premier les informations de compte dans "Paramètres" pour assurer l'envoi de facture
 ```
 
 ### 🚨 COMMANDES RAPIDES
@@ -196,5 +197,6 @@ L'application implémente les meilleures pratiques de sécurité :
 3. Déployez automatiquement
 
 ---
+Pour tester le projet : https://ibrahima-sass-app-m2-connect.vercel.app 
 
 ⭐ **Si ce projet vous a plu, n'hésitez pas à lui donner une étoile !**
