@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { 
   Sidebar, 
@@ -25,7 +24,6 @@ import {
 import { motion } from "motion/react";
 
 export default function CommentCaMarche() {
-  const { user } = useUser();
   const [etapeActive, setEtapeActive] = useState<number | null>(null);
 
   // Configuration des liens de navigation
@@ -67,7 +65,7 @@ export default function CommentCaMarche() {
     {
       id: 1,
       titre: "Configurer vos informations bancaires",
-      description: "Commencez par renseigner vos informations bancaires pour qu'elles apparaissent sur vos factures",
+      description: "Commencez par renseigner vos informations bancaires pour qu&apos;elles apparaissent sur vos factures",
       icon: <IconCashBanknote className="h-8 w-8 text-blue-600 dark:text-blue-400" />,
       lien: "/settings",
       couleur: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800",
@@ -86,7 +84,7 @@ export default function CommentCaMarche() {
       lien: "/clients",
       couleur: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800",
       details: [
-        "Nom de l'entreprise ou du client",
+        "Nom de l&apos;entreprise ou du client",
         "Adresse email de contact",
         "Adresse complète",
         "Gestion et modification ultérieure"
@@ -259,7 +257,7 @@ export default function CommentCaMarche() {
                   <ul className="space-y-2 text-blue-800 dark:text-blue-200">
                     <li className="flex items-start space-x-2">
                       <span className="text-blue-600 dark:text-blue-400 mt-1">•</span>
-                      <span>Configurez d'abord vos informations bancaires pour qu'elles apparaissent automatiquement sur toutes vos factures</span>
+                      <span>Configurez d&apos;abord vos informations bancaires pour qu&apos;elles apparaissent automatiquement sur toutes vos factures</span>
                     </li>
                     <li className="flex items-start space-x-2">
                       <span className="text-blue-600 dark:text-blue-400 mt-1">•</span>
@@ -271,7 +269,7 @@ export default function CommentCaMarche() {
                     </li>
                     <li className="flex items-start space-x-2">
                       <span className="text-blue-600 dark:text-blue-400 mt-1">•</span>
-                      <span>Vérifiez toujours le PDF généré avant l'envoi par email</span>
+                      <span>Vérifiez toujours le PDF généré avant l&apos;envoi par email</span>
                     </li>
                   </ul>
                 </div>
