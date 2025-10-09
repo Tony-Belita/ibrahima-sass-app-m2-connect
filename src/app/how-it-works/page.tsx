@@ -65,7 +65,7 @@ export default function CommentCaMarche() {
     {
       id: 1,
       titre: "Configurer vos informations bancaires",
-      description: "Commencez par renseigner vos informations bancaires pour qu&apos;elles apparaissent sur vos factures",
+      description: "Commencez par renseigner vos informations bancaires pour qu'elles apparaissent sur vos factures",
       icon: <IconCashBanknote className="h-8 w-8 text-blue-600 dark:text-blue-400" />,
       lien: "/settings",
       couleur: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800",
