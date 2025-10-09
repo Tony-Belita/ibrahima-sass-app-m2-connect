@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import {
     ClerkProvider,
     SignInButton,
+    SignUpButton,
     SignedIn,
     SignedOut,
     UserButton,
@@ -65,18 +66,30 @@ export default function RootLayout({
             <div className="flex items-center gap-5 relative z-10">
               {/* Si l'utilisateur n'est pas connecté */}
               <SignedOut>
-                <SignInButton 
-                  mode="modal"
-                  signUpForceRedirectUrl="/dashboard"
-                  forceRedirectUrl="/dashboard"
-                >
-                  <button className="relative inline-flex h-10 overflow-hidden rounded-full p-[2px] focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900">
-                    <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-                    <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-6 py-1 text-sm font-medium text-white backdrop-blur-3xl hover:bg-slate-800 transition-colors">
-                      S&apos;inscrire
-                    </span>
-                  </button>
-                </SignInButton>
+                <div className="flex items-center gap-3">
+                  {/* Bouton de connexion */}
+                  <SignInButton 
+                    mode="modal"
+                    forceRedirectUrl="/how-it-works"
+                  >
+                    <button className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-blue-400 hover:bg-slate-800/50 rounded-lg transition-all duration-200">
+                      Se connecter
+                    </button>
+                  </SignInButton>
+                  
+                  {/* Bouton d'inscription avec style spécial */}
+                  <SignUpButton 
+                    mode="modal"
+                    forceRedirectUrl="/how-it-works"
+                  >
+                    <button className="relative inline-flex h-10 overflow-hidden rounded-full p-[2px] focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900">
+                      <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
+                      <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-6 py-1 text-sm font-medium text-white backdrop-blur-3xl hover:bg-slate-800 transition-colors">
+                        S'inscrire
+                      </span>
+                    </button>
+                  </SignUpButton>
+                </div>
               </SignedOut>
               
               {/* Si l'utilisateur est connecté */}

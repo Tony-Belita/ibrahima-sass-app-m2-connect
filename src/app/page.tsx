@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Boxes } from "@/components/ui/background-boxes";
 import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
-import { SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import { SignInButton, SignUpButton, SignedIn, SignedOut } from "@clerk/nextjs";
 
 export default async function Accueil() {
   // Mots pour l'effet Typewriter
@@ -54,28 +54,43 @@ export default async function Accueil() {
         {/* Boutons conditionnels selon l'état d'authentification */}
         <div className="relative z-30">
           <SignedOut>
-            {/* Bouton de connexion avec modal Clerk */}
-            <SignInButton 
-              mode="modal"
-              signUpForceRedirectUrl="/dashboard"
-              forceRedirectUrl="/dashboard"
-            >
-              <button className="p-[3px] relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
-                <div className="px-8 py-3 bg-black rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent">
-                  Se connecter
-                </div>
-              </button>
-            </SignInButton>
+            {/* Boutons séparés pour connexion et inscription */}
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
+              {/* Bouton de connexion pour utilisateurs existants */}
+              <SignInButton 
+                mode="modal"
+                forceRedirectUrl="/how-it-works"
+              >
+                <button className="p-[3px] relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg" />
+                  <div className="px-8 py-3 bg-black rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent">
+                    Se connecter
+                  </div>
+                </button>
+              </SignInButton>
+
+              {/* Bouton d'inscription pour nouveaux utilisateurs */}
+              <SignUpButton 
+                mode="modal"
+                forceRedirectUrl="/how-it-works"
+              >
+                <button className="p-[3px] relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
+                  <div className="px-8 py-3 bg-black rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent">
+                    S'inscrire
+                  </div>
+                </button>
+              </SignUpButton>
+            </div>
           </SignedOut>
           
           <SignedIn>
-            {/* Bouton vers le dashboard pour les utilisateurs connectés */}
-            <Link href='/dashboard'>
+            {/* Bouton vers le guide pour les utilisateurs connectés */}
+            <Link href='/how-it-works'>
               <button className="p-[3px] relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg" />
                 <div className="px-8 py-3 bg-black rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent">
-                  Accéder au tableau de bord
+                  Voir comment ça marche
                 </div>
               </button>
             </Link>

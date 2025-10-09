@@ -257,7 +257,7 @@ export default function CommentCaMarche() {
                   <ul className="space-y-2 text-blue-800 dark:text-blue-200">
                     <li className="flex items-start space-x-2">
                       <span className="text-blue-600 dark:text-blue-400 mt-1">•</span>
-                      <span>Configurez d&apos;abord vos informations bancaires pour qu&apos;elles apparaissent automatiquement sur toutes vos factures</span>
+                      <span>Configurez d'abord vos informations bancaires pour qu'elles apparaissent automatiquement sur toutes vos factures</span>
                     </li>
                     <li className="flex items-start space-x-2">
                       <span className="text-blue-600 dark:text-blue-400 mt-1">•</span>
@@ -269,7 +269,7 @@ export default function CommentCaMarche() {
                     </li>
                     <li className="flex items-start space-x-2">
                       <span className="text-blue-600 dark:text-blue-400 mt-1">•</span>
-                      <span>Vérifiez toujours le PDF généré avant l&apos;envoi par email</span>
+                      <span>Vérifiez toujours le PDF généré avant l'envoi par email</span>
                     </li>
                   </ul>
                 </div>

@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useReactToPrint } from "react-to-print";
 import { motion } from "motion/react";
 import { BackgroundGradient } from "@/components/ui/background-gradient";
+import Swal from 'sweetalert2';
 
 // Interface pour les props du composant à imprimer
 interface PropsImpression {
@@ -205,7 +206,29 @@ export default function PageFacture() {
   // Fonction qui envoie la facture par email
   const gererEnvoiFacture = async () => {
     if (!facture || !client || !infoBancaire) {
-      alert("Impossible d'envoyer l'email : données manquantes");
+      await Swal.fire({
+        title: '❌ Données manquantes',
+        text: "Impossible d'envoyer l'email : toutes les données nécessaires ne sont pas disponibles.",
+        icon: 'error',
+        confirmButtonText: 'Compris',
+        confirmButtonColor: '#ef4444'
+      });
+      return;
+    }
+
+    // Confirmation avant envoi
+    const confirmation = await Swal.fire({
+      title: '📧 Confirmer l\'envoi',
+      text: `Envoyer la facture #${facture.id} par email à ${client.email} ?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Envoyer',
+      cancelButtonText: 'Annuler',
+      confirmButtonColor: '#10b981',
+      cancelButtonColor: '#6b7280'
+    });
+
+    if (!confirmation.isConfirmed) {
       return;
     }
 
@@ -240,7 +263,15 @@ export default function PageFacture() {
       console.log("📊 Status de la réponse:", response.status);
       
       if (response.ok) {
-        alert("✅ Email envoyé avec succès !");
+        await Swal.fire({
+          title: '✅ Email envoyé !',
+          text: 'La facture a été envoyée avec succès par email au client.',
+          icon: 'success',
+          confirmButtonText: 'Parfait !',
+          confirmButtonColor: '#10b981',
+          timer: 3000,
+          showConfirmButton: true
+        });
         console.log("Email envoyé:", data);
       } else {
         console.error("❌ Erreur API:", {
@@ -248,11 +279,27 @@ export default function PageFacture() {
           statusText: response.statusText,
           data: data
         });
-        alert(`❌ Erreur lors de l'envoi : ${data.message || 'Erreur inconnue'}`);
+        await Swal.fire({
+          title: '❌ Erreur d\'envoi',
+          text: `Échec lors de l'envoi de l'email : ${data.message || 'Erreur inconnue'}`,
+          icon: 'error',
+          confirmButtonText: 'Réessayer',
+          confirmButtonColor: '#ef4444',
+          showCancelButton: true,
+          cancelButtonText: 'Fermer'
+        });
       }
     } catch (error) {
-      console.error(" Erreur réseau:", error);
-      alert("Erreur de connexion lors de l'envoi de l'email");
+      console.error("🔌 Erreur réseau:", error);
+      await Swal.fire({
+        title: '🔌 Erreur de connexion',
+        text: 'Impossible de se connecter au serveur pour envoyer l\'email. Vérifiez votre connexion internet.',
+        icon: 'error',
+        confirmButtonText: 'Réessayer',
+        confirmButtonColor: '#ef4444',
+        showCancelButton: true,
+        cancelButtonText: 'Fermer'
+      });
     }
   };
 
