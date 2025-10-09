@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ynov-Sass-M2-Connect - Créez vos factures facilement",
+  title: "Ynov-SaaS-M2-Connect - Créez vos factures facilement",
   description: "Application de facturation moderne pour gérer vos clients et créer des factures professionnelles",
 };
 
@@ -58,7 +58,7 @@ export default function RootLayout({
               href="/" 
               className="text-xl font-extrabold text-white hover:text-blue-400 transition-colors duration-200 relative z-10"
             >
-              Ynov-Sass-Facturation
+              Ynov-SaaS-Facturation
             </Link>
             
             {/* Menu de navigation et authentification */}

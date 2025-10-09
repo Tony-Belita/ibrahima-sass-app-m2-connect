@@ -46,7 +46,7 @@ export default async function Accueil() {
         </div>
         
         <p className='opacity-70 mb-8 text-sm md:text-base leading-loose max-w-2xl text-gray-300 relative'>
-          Ynov-Sass-M2-Connect est un logiciel de facturation en ligne qui vous aide à créer et 
+          Ynov-SaaS-M2-Connect est un logiciel de facturation en ligne qui vous aide à créer et 
           imprimer des factures professionnelles pour vos clients gratuitement ! 
           Gérez votre entreprise et vos clients avec un seul logiciel de facturation.
         </p>
