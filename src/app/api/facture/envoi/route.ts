@@ -125,15 +125,23 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Validation de l'adresse email d'expéditeur
-        const fromEmail = `${nomEmetteur} <onboarding@resend.dev>`;
+        // Gestion des restrictions Resend en mode développement
+        const isDevelopment = process.env.NODE_ENV === 'development' || !process.env.RESEND_VERIFIED_DOMAIN;
+        const emailDestination = isDevelopment ? 'barryibrahimatalibe@gmail.com' : emailClient;
+        
         console.log("📤 Préparation de l'envoi:", {
-            from: fromEmail,
-            to: emailClient,
+            mode: isDevelopment ? 'DÉVELOPPEMENT' : 'PRODUCTION',
+            emailOriginal: emailClient,
+            emailUtilise: emailDestination,
             subject: `Facture #${factureID} - ${titreFacture}`,
             articlesCount: articlesArray.length,
             montant: montant
         });
+
+        // Avertissement si on utilise l'email de test
+        if (isDevelopment && emailClient !== 'barryibrahimatalibe@gmail.com') {
+            console.log("⚠️ MODE TEST: Email envoyé à barryibrahimatalibe@gmail.com au lieu de", emailClient);
+        }
 
         // template HTML simple au lieu d'utiliser React Email qui pose problème
         const htmlContent = `
@@ -152,10 +160,21 @@ export async function POST(req: NextRequest) {
                 .table th { background-color: #f8f9fa; color: #333; font-weight: bold; }
                 .total { background-color: #e9ecef; font-weight: bold; }
                 .footer { margin-top: 30px; text-align: center; color: #666; font-size: 14px; }
+                .test-notice { background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px 0; }
             </style>
         </head>
         <body>
             <div class="container">
+                ${isDevelopment && emailClient !== 'barryibrahimatalibe@gmail.com' ? `
+                <div class="test-notice">
+                    <h4 style="color: #856404; margin: 0 0 10px 0;">📧 Mode Test Activé</h4>
+                    <p style="color: #856404; margin: 0; font-size: 14px;">
+                        Cette facture était destinée à <strong>${String(emailClient).replace(/[<>&"']/g, '')}</strong> 
+                        mais a été envoyée à votre email de test pour des raisons de sécurité.
+                    </p>
+                </div>
+                ` : ''}
+                
                 <div class="header">
                     <h1>Facture #${String(factureID).replace(/[<>&"']/g, '')}</h1>
                     <p>${String(titreFacture).replace(/[<>&"']/g, '')}</p>
@@ -165,7 +184,7 @@ export async function POST(req: NextRequest) {
                     <h3>Informations de facturation :</h3>
                     <p><strong>De :</strong> ${String(nomEmetteur).replace(/[<>&"']/g, '')}</p>
                     <p><strong>Pour :</strong> ${String(nomClient).replace(/[<>&"']/g, '')}</p>
-                    <p><strong>Email :</strong> ${String(emailClient).replace(/[<>&"']/g, '')}</p>
+                    <p><strong>Email destinataire :</strong> ${String(emailClient).replace(/[<>&"']/g, '')}</p>
                     <p><strong>Date :</strong> ${String(dateCreation).replace(/[<>&"']/g, '')}</p>
                     <p><strong>N° de compte :</strong> ${String(numeroCompte).replace(/[<>&"']/g, '')}</p>
                 </div>
@@ -263,7 +282,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        if (!emailClient || !emailClient.includes('@')) {
+        if (!emailDestination || !emailDestination.includes('@')) {
             console.error("❌ Email destinataire invalide");
             return NextResponse.json(
                 { message: "Adresse email destinataire invalide" },
@@ -289,7 +308,7 @@ export async function POST(req: NextRequest) {
                 // Configuration optimisée de l'email
                 const emailData = {
                     from: "onboarding@resend.dev", // Email simple sans nom pour éviter les problèmes d'encodage
-                    to: [emailClient],
+                    to: [emailDestination], // Utilise l'email de destination déterminé
                     subject: `Facture #${factureID} - ${titreFacture}`,
                     html: htmlContent,
                     headers: {
@@ -304,7 +323,8 @@ export async function POST(req: NextRequest) {
                     to: emailData.to,
                     subject: emailData.subject,
                     htmlLength: htmlContent.length,
-                    hasHeaders: !!emailData.headers
+                    hasHeaders: !!emailData.headers,
+                    isDevelopmentMode: isDevelopment
                 });
 
                 // Vérification de l'instance Resend avant utilisation
@@ -374,15 +394,31 @@ export async function POST(req: NextRequest) {
                 errorKeys: typeof error === 'object' ? Object.keys(error) : undefined,
                 errorString: JSON.stringify(error)
             });
+
+            // Gestion spécifique des erreurs Resend courantes
+            let messageUtilisateur = "Échec de l'envoi de l'email !";
+            let details = "L'API Resend a retourné une erreur";
+            
+            if (typeof error === 'object' && error.message) {
+                if (error.message.includes('domain')) {
+                    messageUtilisateur = "Configuration email requise";
+                    details = "Un domaine vérifié est nécessaire pour envoyer des emails en production. En mode test, les emails sont envoyés à votre adresse de test.";
+                } else if (error.message.includes('testing emails')) {
+                    messageUtilisateur = "Email envoyé en mode test";
+                    details = `Email redirigé vers votre adresse de test (${isDevelopment ? 'barryibrahimatalibe@gmail.com' : 'email de test'}) car aucun domaine n'est configuré.`;
+                }
+            }
+
             return NextResponse.json(
                 { 
-                    message: "Échec de l'envoi de l'email !", 
+                    message: messageUtilisateur, 
                     erreur: error,
-                    details: "L'API Resend a retourné une erreur",
+                    details: details,
                     errorType: typeof error,
                     debugInfo: {
                         hasData: !!data,
-                        errorKeys: typeof error === 'object' ? Object.keys(error) : undefined
+                        errorKeys: typeof error === 'object' ? Object.keys(error) : undefined,
+                        isDevelopment: isDevelopment
                     }
                 },
                 { status: 500 }
@@ -409,10 +445,19 @@ export async function POST(req: NextRequest) {
         }
 
         console.log("✅ Email envoyé avec succès:", data);
+        
+        // Message de succès adapté selon le mode
+        const messageSucces = isDevelopment && emailClient !== 'barryibrahimatalibe@gmail.com' 
+            ? `Email envoyé avec succès en mode test ! (redirigé vers ${emailDestination})`
+            : "Email envoyé avec succès !";
+            
         return NextResponse.json(
             { 
-                message: "Email envoyé avec succès !",
-                donnees: data 
+                message: messageSucces,
+                donnees: data,
+                destinataireOriginal: emailClient,
+                destinataireUtilise: emailDestination,
+                modeTest: isDevelopment
             }, 
             { status: 200 }
         );
