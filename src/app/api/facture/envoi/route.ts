@@ -292,7 +292,7 @@ export async function POST(req: NextRequest) {
         
         // Gestion d'erreurs plus détaillée
         let messageErreur = "Erreur lors de l'envoi de l'email !";
-        let detailsErreur = erreur instanceof Error ? erreur.message : "Erreur inconnue";
+        const detailsErreur = erreur instanceof Error ? erreur.message : "Erreur inconnue";
         
         if (erreur instanceof TypeError) {
             messageErreur = "Erreur de type de données";

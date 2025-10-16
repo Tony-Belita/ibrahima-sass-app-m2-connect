@@ -78,7 +78,7 @@ export default function TemplateEmailFacture({
                     <Section style={styles.detailsSection}>
                         <Row>
                             <Column style={styles.detailColumn}>
-                                <Text style={styles.detailLabel}>Date d'émission:</Text>
+                                <Text style={styles.detailLabel}>Date d&apos;émission:</Text>
                                 <Text style={styles.detailValue}>{dateCreation}</Text>
                             </Column>
                             <Column style={styles.detailColumn}>
