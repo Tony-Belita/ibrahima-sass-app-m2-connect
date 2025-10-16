@@ -271,8 +271,18 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        // Types pour la réponse Resend
+        interface ResendEmailData {
+            id: string;
+        }
+
+        interface ResendResponse {
+            data: ResendEmailData | null;
+            error: Error | null;
+        }
+
         // Fonction de retry pour l'envoi d'email
-        const tentativeEnvoi = async (tentative: number = 1, maxTentatives: number = 3): Promise<any> => {
+        const tentativeEnvoi = async (tentative: number = 1, maxTentatives: number = 3): Promise<ResendResponse> => {
             console.log(`📧 Tentative d'envoi ${tentative}/${maxTentatives}...`);
             
             try {
