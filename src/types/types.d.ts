@@ -44,3 +44,9 @@ interface InfoBancaire {
     devise: string;          // Devise utilisée
     cree_le: string;         // Date de création
 }
+
+// Déclarations de modules pour les imports de fichiers statiques
+declare module "*.css" {
+    const content: { [className: string]: string };
+    export default content;
+}
