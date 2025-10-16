@@ -125,6 +125,16 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        // Validation de l'adresse email d'expéditeur
+        const fromEmail = `${nomEmetteur} <onboarding@resend.dev>`;
+        console.log("📤 Préparation de l'envoi:", {
+            from: fromEmail,
+            to: emailClient,
+            subject: `Facture #${factureID} - ${titreFacture}`,
+            articlesCount: articlesArray.length,
+            montant: montant
+        });
+
         // template HTML simple au lieu d'utiliser React Email qui pose problème
         const htmlContent = `
         <html>
@@ -147,17 +157,17 @@ export async function POST(req: NextRequest) {
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>Facture #${factureID}</h1>
-                    <p>${titreFacture}</p>
+                    <h1>Facture #${String(factureID).replace(/[<>&"']/g, '')}</h1>
+                    <p>${String(titreFacture).replace(/[<>&"']/g, '')}</p>
                 </div>
                 
                 <div class="info-section">
                     <h3>Informations de facturation :</h3>
-                    <p><strong>De :</strong> ${nomEmetteur}</p>
-                    <p><strong>Pour :</strong> ${nomClient}</p>
-                    <p><strong>Email :</strong> ${emailClient}</p>
-                    <p><strong>Date :</strong> ${dateCreation}</p>
-                    <p><strong>N° de compte :</strong> ${numeroCompte}</p>
+                    <p><strong>De :</strong> ${String(nomEmetteur).replace(/[<>&"']/g, '')}</p>
+                    <p><strong>Pour :</strong> ${String(nomClient).replace(/[<>&"']/g, '')}</p>
+                    <p><strong>Email :</strong> ${String(emailClient).replace(/[<>&"']/g, '')}</p>
+                    <p><strong>Date :</strong> ${String(dateCreation).replace(/[<>&"']/g, '')}</p>
+                    <p><strong>N° de compte :</strong> ${String(numeroCompte).replace(/[<>&"']/g, '')}</p>
                 </div>
 
                 <table class="table">
@@ -183,9 +193,12 @@ export async function POST(req: NextRequest) {
                                 prixTotal = article.prix;
                             }
                             
+                            // Nettoyage sécurisé des données pour éviter l'injection HTML
+                            const nomSecurise = String(article.nom || '').replace(/[<>&"']/g, '');
+                            
                             return `
                                 <tr>
-                                    <td>${article.nom}</td>
+                                    <td>${nomSecurise}</td>
                                     <td>${article.quantite}</td>
                                     <td>${coutUnitaire.toFixed(2)} ${devise}</td>
                                     <td>${prixTotal.toFixed(2)} ${devise}</td>
@@ -204,20 +217,20 @@ export async function POST(req: NextRequest) {
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                         <div>
                             <p style="margin: 5px 0; color: #666; font-size: 12px; text-transform: uppercase;">Nom du compte :</p>
-                            <p style="margin: 5px 0; color: #333; font-weight: bold;">${nomEmetteur}</p>
+                            <p style="margin: 5px 0; color: #333; font-weight: bold;">${String(nomEmetteur).replace(/[<>&"']/g, '')}</p>
                         </div>
                         <div>
                             <p style="margin: 5px 0; color: #666; font-size: 12px; text-transform: uppercase;">Numéro de compte :</p>
-                            <p style="margin: 5px 0; color: #333; font-weight: bold; font-family: monospace;">${numeroCompte}</p>
+                            <p style="margin: 5px 0; color: #333; font-weight: bold; font-family: monospace;">${String(numeroCompte).replace(/[<>&"']/g, '')}</p>
                         </div>
                         <div>
                             <p style="margin: 5px 0; color: #666; font-size: 12px; text-transform: uppercase;">Devise :</p>
-                            <p style="margin: 5px 0; color: #333; font-weight: bold;">${devise}</p>
+                            <p style="margin: 5px 0; color: #333; font-weight: bold;">${String(devise).replace(/[<>&"']/g, '')}</p>
                         </div>
                     </div>
                     <div style="background-color: #e3f2fd; padding: 15px; border-radius: 6px; margin-top: 15px; border-left: 3px solid #2196f3;">
                         <p style="margin: 0; color: #1565c0; font-weight: bold; font-size: 14px;">
-                            🏷️ Référence de paiement : FACT-${factureID}
+                            🏷️ Référence de paiement : FACT-${String(factureID).replace(/[<>&"']/g, '')}
                         </p>
                         <p style="margin: 5px 0 0 0; color: #1976d2; font-size: 12px;">
                             Veuillez mentionner cette référence lors de votre virement bancaire.
@@ -234,21 +247,100 @@ export async function POST(req: NextRequest) {
         </html>
         `;
 
-        // Tentative d'envoi avec gestion d'erreurs améliorée
+        // Validation du contenu HTML
+        console.log("📄 Contenu HTML généré:", {
+            length: htmlContent.length,
+            hasBasicStructure: htmlContent.includes('<html>') && htmlContent.includes('</html>'),
+            articlesIncluded: articlesArray.length
+        });
+
+        // Validation finale des données critiques
+        if (!htmlContent || htmlContent.length < 500) {
+            console.error("❌ Contenu HTML invalide ou trop court");
+            return NextResponse.json(
+                { message: "Erreur de génération du contenu de l'email" },
+                { status: 400 }
+            );
+        }
+
+        if (!emailClient || !emailClient.includes('@')) {
+            console.error("❌ Email destinataire invalide");
+            return NextResponse.json(
+                { message: "Adresse email destinataire invalide" },
+                { status: 400 }
+            );
+        }
+
+        // Fonction de retry pour l'envoi d'email
+        const tentativeEnvoi = async (tentative: number = 1, maxTentatives: number = 3): Promise<any> => {
+            console.log(`📧 Tentative d'envoi ${tentative}/${maxTentatives}...`);
+            
+            try {
+                // Configuration optimisée de l'email
+                const emailData = {
+                    from: "onboarding@resend.dev", // Email simple sans nom pour éviter les problèmes d'encodage
+                    to: [emailClient],
+                    subject: `Facture #${factureID} - ${titreFacture}`,
+                    html: htmlContent,
+                    headers: {
+                        'Content-Type': 'text/html; charset=utf-8',
+                        'X-Priority': '1',
+                        'X-MSMail-Priority': 'High'
+                    }
+                };
+
+                console.log("📨 Données d'envoi optimisées:", {
+                    from: emailData.from,
+                    to: emailData.to,
+                    subject: emailData.subject,
+                    htmlLength: htmlContent.length,
+                    hasHeaders: !!emailData.headers
+                });
+
+                // Vérification de l'instance Resend avant utilisation
+                if (!resend || typeof resend.emails?.send !== 'function') {
+                    throw new Error("Instance Resend non initialisée correctement");
+                }
+
+                const result = await resend.emails.send(emailData);
+                
+                console.log("📬 Réponse brute de Resend:", {
+                    result: result,
+                    type: typeof result,
+                    keys: result ? Object.keys(result) : undefined
+                });
+                
+                return result;
+            } catch (sendError) {
+                console.error(`❌ Erreur tentative ${tentative}:`, {
+                    error: sendError,
+                    message: sendError instanceof Error ? sendError.message : 'Erreur inconnue',
+                    stack: sendError instanceof Error ? sendError.stack : undefined
+                });
+                
+                if (tentative < maxTentatives) {
+                    // Attendre avant la prochaine tentative (délai exponentiel)
+                    const delai = Math.pow(2, tentative - 1) * 1000; // 1s, 2s, 4s...
+                    console.log(`⏳ Attente de ${delai}ms avant la prochaine tentative...`);
+                    await new Promise(resolve => setTimeout(resolve, delai));
+                    return tentativeEnvoi(tentative + 1, maxTentatives);
+                } else {
+                    throw sendError;
+                }
+            }
+        };
+
+        // Tentative d'envoi avec retry automatique
         let emailResult;
         try {
-            emailResult = await resend.emails.send({
-                from: `${nomEmetteur} <onboarding@resend.dev>`,
-                to: [emailClient],
-                subject: `Facture #${factureID} - ${titreFacture}`,
-                html: htmlContent,
-            });
+            emailResult = await tentativeEnvoi();
         } catch (sendError) {
-            console.error("❌ Erreur lors de l'appel à l'API Resend:", sendError);
+            console.error("❌ Échec définitif après toutes les tentatives:", sendError);
             return NextResponse.json(
                 { 
-                    message: "Échec de l'envoi de l'email !", 
-                    erreur: sendError instanceof Error ? sendError.message : "Erreur inconnue lors de l'envoi"
+                    message: "Échec de l'envoi de l'email après plusieurs tentatives", 
+                    erreur: sendError instanceof Error ? sendError.message : "Erreur inconnue lors de l'envoi",
+                    details: "Toutes les tentatives d'envoi ont échoué"
                 },
                 { status: 500 }
             );
@@ -256,24 +348,51 @@ export async function POST(req: NextRequest) {
 
         const { data, error } = emailResult;
 
+        // Logs détaillés de la réponse
+        console.log("📊 Analyse de la réponse Resend:", {
+            hasData: !!data,
+            hasError: !!error,
+            data: data,
+            error: error,
+            emailResultKeys: Object.keys(emailResult || {})
+        });
+
         if (error) {
-            console.error("❌ Erreur Resend:", error);
+            console.error("❌ Erreur détaillée de Resend:", {
+                error: error,
+                errorType: typeof error,
+                errorKeys: typeof error === 'object' ? Object.keys(error) : undefined,
+                errorString: JSON.stringify(error)
+            });
             return NextResponse.json(
                 { 
                     message: "Échec de l'envoi de l'email !", 
                     erreur: error,
-                    details: "L'API Resend a retourné une erreur"
+                    details: "L'API Resend a retourné une erreur",
+                    errorType: typeof error,
+                    debugInfo: {
+                        hasData: !!data,
+                        errorKeys: typeof error === 'object' ? Object.keys(error) : undefined
+                    }
                 },
                 { status: 500 }
             );
         }
 
         if (!data) {
-            console.error("❌ Aucune donnée retournée par Resend");
+            console.error("❌ Aucune donnée retournée par Resend:", {
+                emailResult: emailResult,
+                resultType: typeof emailResult,
+                resultKeys: emailResult ? Object.keys(emailResult) : undefined
+            });
             return NextResponse.json(
                 { 
                     message: "Échec de l'envoi de l'email !", 
-                    erreur: "Aucune donnée retournée par le service d'email"
+                    erreur: "Aucune donnée retournée par le service d'email",
+                    debugInfo: {
+                        emailResult: emailResult,
+                        resultType: typeof emailResult
+                    }
                 },
                 { status: 500 }
             );
