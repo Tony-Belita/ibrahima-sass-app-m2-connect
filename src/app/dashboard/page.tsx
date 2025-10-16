@@ -437,7 +437,7 @@ export default function TableauDeBord() {
                     disabled={chargementCreation}
                   >
                     <IconPlus className="h-4 w-4" />
-                    Ajouter l'article
+                    Ajouter l&apos;article
                   </button>
                 </BackgroundGradient>
               </div>

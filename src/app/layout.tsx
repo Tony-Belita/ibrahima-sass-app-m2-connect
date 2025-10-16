@@ -9,7 +9,7 @@ import {
     UserButton,
 } from "@clerk/nextjs";
 import Link from "next/link";
-// @ts-ignore: side-effect CSS import - add a global .d.ts (declare module '*.css') if you prefer a proper type declaration
+// @ts-expect-error: side-effect CSS import - add a global .d.ts (declare module '*.css') if you prefer a proper type declaration
 import "./globals.css";
 
 const geistSans = Geist({
